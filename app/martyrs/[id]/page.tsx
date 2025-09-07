@@ -4,9 +4,11 @@ import { useAuth } from "@/lib/auth-context"
 import { useRouter } from "next/navigation"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import { getMartyrById } from "@/lib/data"
+import { getMartyrByIdAction } from "./actions"
 import { notFound } from "next/navigation"
 import Image from "next/image"
+import { useEffect, useState, use } from "react"
+import type { Martyr } from "@/lib/types"
 import {
   CalendarIcon,
   MapPinIcon,
@@ -23,10 +25,48 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ContributionForm } from "@/components/contribution-form"
 
-export default function MartyrPage({ params }: { params: { id: string } }) {
-  const martyr = getMartyrById(params.id)
+export default function MartyrPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params)
+  const [martyr, setMartyr] = useState<Martyr | null>(null)
+  const [loading, setLoading] = useState(true)
   const { user } = useAuth()
   const router = useRouter()
+
+  useEffect(() => {
+    async function fetchMartyr() {
+      try {
+        const martyrData = await getMartyrByIdAction(resolvedParams.id)
+        setMartyr(martyrData)
+        if (!martyrData) {
+          notFound()
+        }
+      } catch (error) {
+        console.error("Error fetching martyr:", error)
+        notFound()
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    fetchMartyr()
+  }, [resolvedParams.id])
+
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-background">
+        <Header />
+        <div className="container py-8">
+          <div className="flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
+              <p className="mt-4 text-muted-foreground">Loading...</p>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </main>
+    )
+  }
 
   if (!martyr) {
     notFound()
@@ -76,7 +116,7 @@ export default function MartyrPage({ params }: { params: { id: string } }) {
                 <div className="space-y-3">
                   <div className="flex items-center text-sm">
                     <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
-                    <span>{martyr.date}</span>
+                    <span>{new Date(martyr.dateOfDeath).toLocaleDateString()}</span>
                   </div>
 
                   <div className="flex items-center text-sm">
@@ -144,7 +184,7 @@ export default function MartyrPage({ params }: { params: { id: string } }) {
                         <div className="text-sm text-muted-foreground">
                           <span className="font-medium">{testimonial.author}</span>
                           {testimonial.relationship && <span> - {testimonial.relationship}</span>}
-                          {testimonial.date && <span>, {testimonial.date}</span>}
+                          {testimonial.date && <span>, {new Date(testimonial.date).toLocaleDateString()}</span>}
                         </div>
                       </div>
                     ))}
@@ -178,7 +218,7 @@ export default function MartyrPage({ params }: { params: { id: string } }) {
                             <span>{source.name}</span>
                           )}
                           <div className="text-sm text-muted-foreground">
-                            {source.date} - {source.type.charAt(0).toUpperCase() + source.type.slice(1)}
+                            {new Date(source.date).toLocaleDateString()} - {source.type.charAt(0).toUpperCase() + source.type.slice(1)}
                           </div>
                         </div>
                       </div>

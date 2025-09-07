@@ -15,6 +15,9 @@ services:
     environment:
       - NODE_ENV=development
       - NEXT_TELEMETRY_DISABLED=1
+      - DATABASE_URL=postgresql://postgres:password@host.docker.internal:51213/syrian_martyrs_db
+      - NEXTAUTH_SECRET=your-secret-key-here
+      - NEXTAUTH_URL=http://localhost:3000
     command: pnpm dev
     profiles:
       - dev

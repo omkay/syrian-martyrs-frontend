@@ -1,6 +1,6 @@
 "use server"
 
-import { getMartyrsWithRelations, searchMartyrs, createMartyr, createContribution, getUserByEmail, createUser } from "@/lib/db"
+import { getMartyrsWithRelations, searchMartyrs, createMartyr, createContribution, getUserByEmail, createUser, getMartyrById } from "@/lib/db"
 import type { Martyr } from "@/lib/types"
 
 // Helper function to get or create a user for anonymous submissions
@@ -33,6 +33,16 @@ export async function getMartyrs(limit?: number, offset?: number): Promise<Marty
   } catch (error) {
     console.error("Error fetching martyrs:", error)
     return []
+  }
+}
+
+export async function getMartyrByIdAction(id: string): Promise<Martyr | null> {
+  try {
+    const martyr = await getMartyrById(id)
+    return martyr
+  } catch (error) {
+    console.error("Error fetching martyr:", error)
+    return null
   }
 }
 
