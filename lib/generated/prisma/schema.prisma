@@ -1,0 +1,175 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model for authentication and user management
+model User {
+  id                       String    @id @default(cuid())
+  email                    String    @unique
+  name                     String?
+  password                 String
+  role                     UserRole  @default(USER)
+  isVerified               Boolean   @default(false)
+  emailVerificationToken   String?
+  emailVerificationExpires DateTime?
+  passwordResetToken       String?
+  passwordResetExpires     DateTime?
+  lastLoginAt              DateTime?
+  loginAttempts            Int       @default(0)
+  lockedUntil              DateTime?
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @updatedAt
+
+  // Relations
+  contributions Contribution[]
+  testimonials  Testimonial[]
+  profile       Profile?
+
+  @@map("users")
+}
+
+// User profile information
+model Profile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  bio         String?
+  avatar      String?
+  location    String?
+  website     String?
+  socialLinks Json? // Store social media links as JSON
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+// Martyr model - the core entity
+model Martyr {
+  id           String   @id @default(cuid())
+  name         String
+  dateOfDeath  DateTime
+  location     String
+  cause        String?
+  description  String?
+  image        String?
+  age          Int?
+  gender       Gender?
+  occupation   String?
+  familyStatus String?
+  isVerified   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  testimonials  Testimonial[]
+  sources       Source[]
+  contributions Contribution[]
+
+  @@map("martyrs")
+}
+
+// Testimonial model for personal stories and memories
+model Testimonial {
+  id           String    @id @default(cuid())
+  content      String
+  author       String
+  relationship String?
+  date         DateTime?
+  isVerified   Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relations
+  martyrId String?
+  userId   String?
+  martyr   Martyr? @relation(fields: [martyrId], references: [id], onDelete: SetNull)
+  user     User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("testimonials")
+}
+
+// Source model for references and citations
+model Source {
+  id        String     @id @default(cuid())
+  name      String
+  url       String?
+  date      DateTime
+  type      SourceType
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  // Relations
+  martyrId String?
+  martyr   Martyr? @relation(fields: [martyrId], references: [id], onDelete: SetNull)
+
+  @@map("sources")
+}
+
+// Contribution model for user submissions and edits
+model Contribution {
+  id        String             @id @default(cuid())
+  type      ContributionType
+  status    ContributionStatus @default(PENDING)
+  content   Json // Store contribution data as JSON
+  notes     String?
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  // Relations
+  userId   String
+  martyrId String?
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  martyr   Martyr? @relation(fields: [martyrId], references: [id], onDelete: SetNull)
+
+  @@map("contributions")
+}
+
+// Enums
+enum UserRole {
+  ADMIN
+  MODERATOR
+  USER
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  UNKNOWN
+}
+
+enum SourceType {
+  NEWS
+  REPORT
+  SOCIAL
+  OFFICIAL
+  OTHER
+}
+
+enum ContributionType {
+  MARTYR_ADDITION
+  MARTYR_UPDATE
+  TESTIMONIAL_ADDITION
+  SOURCE_ADDITION
+  CORRECTION
+  OTHER
+}
+
+enum ContributionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  UNDER_REVIEW
+}

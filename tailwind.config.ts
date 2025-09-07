@@ -25,6 +25,10 @@ const config = {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        blue: {
+          600: "#2563eb",
+          700: "#1d4ed8",
+        },
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
@@ -53,30 +57,6 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        blue: {
-          50: "#f0f7ff",
-          100: "#e0eefe",
-          200: "#b9ddfe",
-          300: "#7cc2fd",
-          400: "#36a4fa",
-          500: "#0c87eb",
-          600: "#0068cc",
-          700: "#0153a6",
-          800: "#064688",
-          900: "#0a3c71",
-        },
-        green: {
-          50: "#f0fdf4",
-          100: "#dcfce7",
-          200: "#bbf7d0",
-          300: "#86efac",
-          400: "#4ade80",
-          500: "#22c55e",
-          600: "#16a34a",
-          700: "#15803d",
-          800: "#166534",
-          900: "#14532d",
-        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -103,4 +83,3 @@ const config = {
 } satisfies Config
 
 export default config
-
