@@ -1,6 +1,7 @@
 "use server"
 
-import { getMartyrsWithRelations, searchMartyrs, createMartyr, createContribution, getUserByEmail, createUser, getMartyrById } from "@/lib/db"
+import { getMartyrsWithRelations, searchMartyrs, createMartyr, createContribution, getUserByEmail, createUser, getMartyrById, prisma } from "@/lib/db"
+import { hashPassword, verifyPassword, validatePassword, validateEmail, generateSecureToken } from "@/lib/auth-utils"
 import type { Martyr } from "@/lib/types"
 
 // Helper function to get or create a user for anonymous submissions
@@ -16,20 +17,20 @@ async function getOrCreateAnonymousUser(email: string, name: string) {
         name,
         password: 'anonymous_user', // In production, this should be handled differently
         role: 'USER'
-      })
+      }) as any
     }
     
     return user
   } catch (error) {
     console.error('Error getting or creating user:', error)
-    throw error
+    return null
   }
 }
 
 export async function getMartyrs(limit?: number, offset?: number): Promise<Martyr[]> {
   try {
     const martyrs = await getMartyrsWithRelations(limit, offset)
-    return martyrs
+    return martyrs as Martyr[]
   } catch (error) {
     console.error("Error fetching martyrs:", error)
     return []
@@ -39,7 +40,7 @@ export async function getMartyrs(limit?: number, offset?: number): Promise<Marty
 export async function getMartyrByIdAction(id: string): Promise<Martyr | null> {
   try {
     const martyr = await getMartyrById(id)
-    return martyr
+    return martyr as Martyr | null
   } catch (error) {
     console.error("Error fetching martyr:", error)
     return null
@@ -52,7 +53,7 @@ export async function searchMartyrsAction(query: string): Promise<Martyr[]> {
       return await getMartyrs()
     }
     const martyrs = await searchMartyrs(query)
-    return martyrs
+    return martyrs as Martyr[]
   } catch (error) {
     console.error("Error searching martyrs:", error)
     return []
@@ -85,6 +86,9 @@ export async function submitContribution(formData: FormData) {
 
     // Get or create user for this submission
     const user = await getOrCreateAnonymousUser(email, name)
+    if (!user) {
+      return { success: false, message: "Failed to create user account" }
+    }
 
     // Create contribution record
     await createContribution({
@@ -230,6 +234,195 @@ export async function addMartyr(formData: FormData) {
     return {
       success: false,
       message: "An error occurred while submitting the profile. Please try again.",
+    }
+  }
+}
+
+// User registration action
+export async function signup(formData: FormData) {
+  try {
+    // Extract form data
+    const name = formData.get("name") as string
+    const email = formData.get("email") as string
+    const password = formData.get("password") as string
+    const confirmPassword = formData.get("confirmPassword") as string
+
+    // Validation
+    if (!name || name.trim().length < 2) {
+      return { success: false, message: "Name must be at least 2 characters long" }
+    }
+
+    if (!email || !validateEmail(email)) {
+      return { success: false, message: "Please enter a valid email address" }
+    }
+
+    if (!password) {
+      return { success: false, message: "Password is required" }
+    }
+
+    if (password !== confirmPassword) {
+      return { success: false, message: "Passwords do not match" }
+    }
+
+    // Validate password strength
+    const passwordValidation = validatePassword(password)
+    if (!passwordValidation.isValid) {
+      return { 
+        success: false, 
+        message: `Password requirements not met: ${passwordValidation.errors.join(", ")}` 
+      }
+    }
+
+    // Check if user already exists
+    const existingUser = await getUserByEmail(email)
+    if (existingUser) {
+      return { success: false, message: "An account with this email already exists" }
+    }
+
+    // Hash password
+    const hashedPassword = await hashPassword(password)
+
+    // Check if email verification is required
+    const requireEmailVerification = process.env.REQUIRE_EMAIL_VERIFICATION === "true"
+
+    // Create user with appropriate verification status
+    const user = await createUser({
+      email,
+      name: name.trim(),
+      password: hashedPassword,
+      role: "USER" // Default role for new users
+    })
+
+    if (requireEmailVerification) {
+      // Generate email verification token
+      const emailVerificationToken = generateSecureToken()
+      const emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+
+      // Update user with verification token
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          emailVerificationToken,
+          emailVerificationExpires
+        }
+      })
+
+      // TODO: Send verification email here
+      // For now, we'll just return success
+      // In production, you would send an email with the verification token
+
+      return {
+        success: true,
+        message: "Account created successfully! Please check your email to verify your account.",
+        userId: user.id,
+        requiresVerification: true
+      }
+    } else {
+      // Skip email verification - mark user as verified immediately
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          isVerified: true
+        }
+      })
+
+      return {
+        success: true,
+        message: "Account created successfully! You can now log in.",
+        userId: user.id,
+        requiresVerification: false
+      }
+    }
+  } catch (error) {
+    console.error("Error during signup:", error)
+    return {
+      success: false,
+      message: "An error occurred while creating your account. Please try again.",
+    }
+  }
+}
+
+// User login action
+export async function loginUser(email: string, password: string) {
+  try {
+    // Find user by email
+    const user = await getUserByEmail(email)
+    if (!user) {
+      return { success: false, message: "Invalid email or password" }
+    }
+
+    // Verify password
+    const isPasswordValid = await verifyPassword(password, user.password)
+    if (!isPasswordValid) {
+      return { success: false, message: "Invalid email or password" }
+    }
+
+    // Check if email verification is required and user is not verified
+    const requireEmailVerification = process.env.REQUIRE_EMAIL_VERIFICATION === "true"
+    if (requireEmailVerification && !user.isVerified) {
+      return { 
+        success: false, 
+        message: "Please verify your email address before logging in. Check your email for a verification link." 
+      }
+    }
+
+    // Update last login time
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { lastLoginAt: new Date() }
+    })
+
+    // Return user data (without password)
+    const { password: _, ...userWithoutPassword } = user
+    return {
+      success: true,
+      message: "Login successful",
+      user: userWithoutPassword
+    }
+  } catch (error) {
+    console.error("Error during login:", error)
+    return {
+      success: false,
+      message: "An error occurred during login. Please try again.",
+    }
+  }
+}
+
+// Email verification action
+export async function verifyEmail(token: string) {
+  try {
+    const user = await prisma.user.findFirst({
+      where: {
+        emailVerificationToken: token,
+        emailVerificationExpires: {
+          gt: new Date()
+        }
+      }
+    })
+
+    if (!user) {
+      return { success: false, message: "Invalid or expired verification token" }
+    }
+
+    // Update user as verified
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        isVerified: true,
+        emailVerificationToken: null,
+        emailVerificationExpires: null
+      }
+    })
+
+    return {
+      success: true,
+      message: "Email verified successfully! You can now log in."
+    }
+  } catch (error) {
+    console.error("Error verifying email:", error)
+    return {
+      success: false,
+      message: "An error occurred while verifying your email. Please try again.",
     }
   }
 }

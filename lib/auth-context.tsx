@@ -1,12 +1,14 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
+import { loginUser } from "@/app/actions"
 
 type User = {
   id: string
-  name: string
+  name: string | null
   email: string
-  role: "user" | "admin" | "moderator"
+  role: "USER" | "ADMIN" | "MODERATOR"
+  isVerified: boolean
 }
 
 interface AuthContextType {
@@ -42,56 +44,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  // Mock login function
+  // Real login function
   const login = async (email: string, password: string) => {
     setIsLoading(true)
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-
-    // Mock validation
-    if (!email || !password) {
+    try {
+      const result = await loginUser(email, password)
+      
+      if (result.success && result.user) {
+        setUser(result.user)
+        try {
+          localStorage.setItem("user", JSON.stringify(result.user))
+        } catch (e) {
+          console.error("Failed to store user in localStorage:", e)
+        }
+      }
+      
       setIsLoading(false)
-      return { success: false, message: "Email and password are required" }
-    }
-
-    // Mock credentials check
-    if (email === "admin@example.com" && password === "password") {
-      const user = {
-        id: "1",
-        name: "Admin User",
-        email: "admin@example.com",
-        role: "admin" as const,
-      }
-      setUser(user)
-      try {
-        localStorage.setItem("user", JSON.stringify(user))
-      } catch (e) {
-        console.error("Failed to store user in localStorage:", e)
-      }
+      return { success: result.success, message: result.message }
+    } catch (error) {
       setIsLoading(false)
-      return { success: true, message: "Login successful" }
+      return { success: false, message: "An unexpected error occurred. Please try again." }
     }
-
-    if (email === "user@example.com" && password === "password") {
-      const user = {
-        id: "2",
-        name: "Regular User",
-        email: "user@example.com",
-        role: "user" as const,
-      }
-      setUser(user)
-      try {
-        localStorage.setItem("user", JSON.stringify(user))
-      } catch (e) {
-        console.error("Failed to store user in localStorage:", e)
-      }
-      setIsLoading(false)
-      return { success: true, message: "Login successful" }
-    }
-
-    setIsLoading(false)
-    return { success: false, message: "Invalid email or password" }
   }
 
   // Logout function

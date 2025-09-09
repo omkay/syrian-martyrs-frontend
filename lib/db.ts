@@ -183,7 +183,8 @@ export async function createUser(data: {
       name: data.name,
       password: data.password,
       role: data.role as any
-    }
+    },
+    include: { profile: true }
   })
 }
 

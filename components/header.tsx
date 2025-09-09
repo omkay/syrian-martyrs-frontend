@@ -45,7 +45,7 @@ export function Header() {
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  {user.role === "admin" && (
+                  {(user.role === "ADMIN" || user.role === "MODERATOR") && (
                     <DropdownMenuItem asChild>
                       <Link href="/admin">Admin Dashboard</Link>
                     </DropdownMenuItem>
@@ -64,9 +64,14 @@ export function Header() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button asChild variant="outline" size="sm" className="ml-2">
-                <Link href="/login">Login</Link>
-              </Button>
+              <div className="flex items-center space-x-2 ml-2">
+                <Button asChild variant="ghost" size="sm">
+                  <Link href="/login">Login</Link>
+                </Button>
+                <Button asChild size="sm">
+                  <Link href="/signup">Sign Up</Link>
+                </Button>
+              </div>
             )}
 
             <ModeToggle />

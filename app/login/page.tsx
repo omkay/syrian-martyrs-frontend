@@ -4,6 +4,7 @@ import type React from "react"
 
 import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import Link from "next/link"
 import { useAuth } from "@/lib/auth-context"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
@@ -119,10 +120,21 @@ export default function LoginPage() {
           </CardContent>
 
           <CardFooter className="flex flex-col space-y-4">
+            <div className="text-center space-y-2">
+              <p className="text-sm text-muted-foreground">
+                Don't have an account?{" "}
+                <Button variant="link" className="p-0 h-auto text-sm" asChild>
+                  <Link href="/signup">Sign up here</Link>
+                </Button>
+              </p>
+            </div>
             <div className="text-sm text-muted-foreground text-center">
               <p>Demo Credentials:</p>
-              <p>Admin: admin@example.com / password</p>
-              <p>User: user@example.com / password</p>
+              <p>Admin: admin@syrianmartyrs.com / admin123!</p>
+              <p>User: user@example.com / password123!</p>
+              <p className="mt-2 text-xs">
+                Note: Email verification is controlled by REQUIRE_EMAIL_VERIFICATION env var
+              </p>
             </div>
           </CardFooter>
         </Card>
