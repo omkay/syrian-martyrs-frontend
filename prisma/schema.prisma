@@ -47,11 +47,13 @@ model Profile {
   location    String?
   website     String?
   socialLinks Json?    // Store social media links as JSON
+  isVerified  Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
   // Relations
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contributions Contribution[]
   
   @@map("profiles")
 }
@@ -131,8 +133,10 @@ model Contribution {
   // Relations
   userId      String
   martyrId    String?
+  profileId   String?
   user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   martyr      Martyr?          @relation(fields: [martyrId], references: [id], onDelete: SetNull)
+  profile     Profile?         @relation(fields: [profileId], references: [id], onDelete: SetNull)
   
   @@map("contributions")
 }
@@ -164,6 +168,11 @@ enum ContributionType {
   MARTYR_UPDATE
   TESTIMONIAL_ADDITION
   SOURCE_ADDITION
+  PHOTO_ADDITION
+  DOCUMENT_ADDITION
+  PROFILE_CREATION
+  PROFILE_UPDATE
+  PROFILE_VERIFICATION
   CORRECTION
   OTHER
 }

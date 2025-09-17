@@ -9,7 +9,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Loader2 } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { ProfileContributionForm } from "@/components/profile-contribution-form"
+import { Loader2, User, CheckCircle, XCircle } from "lucide-react"
 
 export default function ProfilePage() {
   const { user, isLoading } = useAuth()
@@ -51,7 +53,7 @@ export default function ProfilePage() {
               <form className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Name</Label>
-                  <Input id="name" defaultValue={user.name} />
+                  <Input id="name" defaultValue={user.name || ""} />
                 </div>
 
                 <div className="space-y-2">
@@ -59,11 +61,56 @@ export default function ProfilePage() {
                   <Input id="email" type="email" defaultValue={user.email} />
                 </div>
 
+                <div className="space-y-2">
+                  <Label htmlFor="role">Role</Label>
+                  <div className="flex items-center space-x-2">
+                    <User className="h-4 w-4" />
+                    <span className="text-sm font-medium">{user.role}</span>
+                    {user.isVerified ? (
+                      <Badge variant="default" className="bg-green-100 text-green-800">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Verified
+                      </Badge>
+                    ) : (
+                      <Badge variant="secondary">
+                        <XCircle className="h-3 w-3 mr-1" />
+                        Unverified
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+
                 <Button>Save Changes</Button>
               </form>
             </CardContent>
           </Card>
 
+          <Card>
+            <CardHeader>
+              <CardTitle>Profile Management</CardTitle>
+              <CardDescription>Create or update your public profile</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="text-center py-4">
+                  <User className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground mb-4">
+                    {user.profile 
+                      ? "Update your profile information or request verification"
+                      : "Create a public profile to share your story with the community"
+                    }
+                  </p>
+                  <ProfileContributionForm 
+                    userId={user.id}
+                    existingProfile={!!user.profile} 
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="mt-6">
           <Card>
             <CardHeader>
               <CardTitle>Security</CardTitle>

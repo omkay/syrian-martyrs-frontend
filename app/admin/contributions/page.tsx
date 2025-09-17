@@ -2,27 +2,26 @@
 
 import { useState, useEffect } from "react"
 import { useAuth } from "@/lib/auth-context"
-import { getContributionsByUser } from "@/lib/db"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ProfileContributionForm } from "@/components/profile-contribution-form"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { 
   User, 
   FileText, 
-  Image, 
-  Link, 
   Edit, 
   CheckCircle, 
   XCircle, 
   Clock, 
   AlertCircle,
-  Plus
+  Eye,
+  ThumbsUp,
+  ThumbsDown
 } from "lucide-react"
+import { hasPermission } from "@/lib/role-utils"
 
 interface Contribution {
   id: string
@@ -32,6 +31,11 @@ interface Contribution {
   notes?: string
   createdAt: string
   updatedAt: string
+  user: {
+    id: string
+    name: string
+    email: string
+  }
   martyr?: {
     id: string
     name: string
@@ -42,11 +46,12 @@ interface Contribution {
   }
 }
 
-export default function ContributionsPage() {
+export default function AdminContributionsPage() {
   const { user } = useAuth()
   const [contributions, setContributions] = useState<Contribution[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [selectedContribution, setSelectedContribution] = useState<Contribution | null>(null)
 
   useEffect(() => {
     if (user) {
@@ -64,6 +69,17 @@ export default function ContributionsPage() {
       setError("Failed to load contributions")
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleStatusUpdate = async (contributionId: string, newStatus: string) => {
+    try {
+      // This would call an action to update the status
+      console.log(`Updating contribution ${contributionId} to ${newStatus}`)
+      // Reload contributions after update
+      await loadContributions()
+    } catch (err) {
+      console.error("Failed to update contribution status:", err)
     }
   }
 
@@ -107,8 +123,6 @@ export default function ContributionsPage() {
       case "MARTYR_ADDITION":
       case "MARTYR_UPDATE":
         return <Edit className="h-5 w-5" />
-      case "SOURCE_ADDITION":
-        return <Link className="h-5 w-5" />
       default:
         return <FileText className="h-5 w-5" />
     }
@@ -137,21 +151,22 @@ export default function ContributionsPage() {
     }
   }
 
-  if (!user) {
+  // Check if user has admin permissions
+  if (!user || !hasPermission("ACCESS_ADMIN_PANEL", user.role)) {
     return (
       <main className="min-h-screen bg-background">
         <Header />
         <div className="container py-12">
           <Card className="max-w-md mx-auto">
             <CardHeader>
-              <CardTitle>Login Required</CardTitle>
+              <CardTitle>Access Denied</CardTitle>
               <CardDescription>
-                Please log in to view your contributions.
+                You don't have permission to access the admin panel.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Button asChild className="w-full">
-                <a href="/login">Login</a>
+                <a href="/">Go Home</a>
               </Button>
             </CardContent>
           </Card>
@@ -166,26 +181,26 @@ export default function ContributionsPage() {
       <Header />
 
       <div className="container py-12">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold">My Contributions</h1>
+            <h1 className="text-3xl font-bold">Contributions Management</h1>
             <p className="text-muted-foreground mt-2">
-              View and manage your contributions to the Syrian Martyrs Memorial
+              Review and manage user contributions to the Syrian Martyrs Memorial
             </p>
           </div>
 
-          <Tabs defaultValue="all" className="space-y-6">
+          <Tabs defaultValue="pending" className="space-y-6">
             <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="profiles">Profiles</TabsTrigger>
-              <TabsTrigger value="martyrs">Martyrs</TabsTrigger>
-              <TabsTrigger value="testimonials">Testimonials</TabsTrigger>
+              <TabsTrigger value="pending">Pending</TabsTrigger>
+              <TabsTrigger value="under-review">Under Review</TabsTrigger>
+              <TabsTrigger value="approved">Approved</TabsTrigger>
+              <TabsTrigger value="rejected">Rejected</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="all" className="space-y-6">
+            <TabsContent value="pending" className="space-y-6">
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold">All Contributions</h2>
-                <ProfileContributionForm existingProfile={!!user.profile} />
+                <h2 className="text-xl font-semibold">Pending Contributions</h2>
+                <Badge variant="secondary">{contributions.filter(c => c.status === "PENDING").length} items</Badge>
               </div>
 
               {isLoading ? (
@@ -198,25 +213,21 @@ export default function ContributionsPage() {
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
-              ) : contributions.length === 0 ? (
+              ) : contributions.filter(c => c.status === "PENDING").length === 0 ? (
                 <Card>
                   <CardContent className="text-center py-12">
-                    <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">No contributions yet</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Start contributing to the Syrian Martyrs Memorial by creating your profile or adding information.
+                    <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No pending contributions</h3>
+                    <p className="text-muted-foreground">
+                      All contributions have been reviewed. Great job!
                     </p>
-                    <div className="space-y-2">
-                      <ProfileContributionForm existingProfile={!!user.profile} />
-                      <Button variant="outline" asChild>
-                        <a href="/add-martyr">Add Martyr Profile</a>
-                      </Button>
-                    </div>
                   </CardContent>
                 </Card>
               ) : (
                 <div className="space-y-4">
-                  {contributions.map((contribution) => (
+                  {contributions
+                    .filter(c => c.status === "PENDING")
+                    .map((contribution) => (
                     <Card key={contribution.id}>
                       <CardHeader>
                         <div className="flex items-center justify-between">
@@ -232,11 +243,11 @@ export default function ContributionsPage() {
                           </div>
                         </div>
                         <CardDescription>
-                          Submitted on {new Date(contribution.createdAt).toLocaleDateString()}
+                          Submitted by {contribution.user.name} ({contribution.user.email}) on {new Date(contribution.createdAt).toLocaleDateString()}
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="space-y-2">
+                        <div className="space-y-4">
                           {contribution.martyr && (
                             <p className="text-sm text-muted-foreground">
                               Related to: <strong>{contribution.martyr.name}</strong>
@@ -245,6 +256,41 @@ export default function ContributionsPage() {
                           {contribution.notes && (
                             <p className="text-sm">{contribution.notes}</p>
                           )}
+                          <div className="flex space-x-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setSelectedContribution(contribution)}
+                            >
+                              <Eye className="h-4 w-4 mr-2" />
+                              Review
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-green-600 border-green-600 hover:bg-green-50"
+                              onClick={() => handleStatusUpdate(contribution.id, "UNDER_REVIEW")}
+                            >
+                              <AlertCircle className="h-4 w-4 mr-2" />
+                              Mark for Review
+                            </Button>
+                            <Button
+                              size="sm"
+                              className="bg-green-600 hover:bg-green-700"
+                              onClick={() => handleStatusUpdate(contribution.id, "APPROVED")}
+                            >
+                              <ThumbsUp className="h-4 w-4 mr-2" />
+                              Approve
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleStatusUpdate(contribution.id, "REJECTED")}
+                            >
+                              <ThumbsDown className="h-4 w-4 mr-2" />
+                              Reject
+                            </Button>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
@@ -253,64 +299,59 @@ export default function ContributionsPage() {
               )}
             </TabsContent>
 
-            <TabsContent value="profiles" className="space-y-6">
+            <TabsContent value="under-review" className="space-y-6">
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold">Profile Contributions</h2>
-                <ProfileContributionForm existingProfile={!!user.profile} />
+                <h2 className="text-xl font-semibold">Under Review</h2>
+                <Badge variant="outline" className="border-blue-500 text-blue-700">
+                  {contributions.filter(c => c.status === "UNDER_REVIEW").length} items
+                </Badge>
               </div>
               
               <Card>
                 <CardContent className="text-center py-12">
-                  <User className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Profile Contributions</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Create or update your profile to share your story with the community.
+                  <AlertCircle className="h-12 w-12 text-blue-500 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Under Review Contributions</h3>
+                  <p className="text-muted-foreground">
+                    Contributions that are currently being reviewed by the moderation team.
                   </p>
-                  <ProfileContributionForm existingProfile={!!user.profile} />
                 </CardContent>
               </Card>
             </TabsContent>
 
-            <TabsContent value="martyrs" className="space-y-6">
+            <TabsContent value="approved" className="space-y-6">
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold">Martyr Contributions</h2>
-                <Button asChild>
-                  <a href="/add-martyr">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Martyr
-                  </a>
-                </Button>
+                <h2 className="text-xl font-semibold">Approved Contributions</h2>
+                <Badge variant="default" className="bg-green-100 text-green-800">
+                  {contributions.filter(c => c.status === "APPROVED").length} items
+                </Badge>
               </div>
               
               <Card>
                 <CardContent className="text-center py-12">
-                  <Edit className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Martyr Contributions</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Add new martyr profiles or update existing ones to help preserve their memory.
+                  <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Approved Contributions</h3>
+                  <p className="text-muted-foreground">
+                    Contributions that have been approved and are now live on the site.
                   </p>
-                  <Button asChild>
-                    <a href="/add-martyr">Add Martyr Profile</a>
-                  </Button>
                 </CardContent>
               </Card>
             </TabsContent>
 
-            <TabsContent value="testimonials" className="space-y-6">
+            <TabsContent value="rejected" className="space-y-6">
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold">Testimonial Contributions</h2>
+                <h2 className="text-xl font-semibold">Rejected Contributions</h2>
+                <Badge variant="destructive">
+                  {contributions.filter(c => c.status === "REJECTED").length} items
+                </Badge>
               </div>
               
               <Card>
                 <CardContent className="text-center py-12">
-                  <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Testimonial Contributions</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Share personal stories and memories about martyrs to help preserve their legacy.
+                  <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Rejected Contributions</h3>
+                  <p className="text-muted-foreground">
+                    Contributions that have been rejected and will not be published.
                   </p>
-                  <Button variant="outline" asChild>
-                    <a href="/search">Browse Martyrs</a>
-                  </Button>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -322,3 +363,4 @@ export default function ContributionsPage() {
     </main>
   )
 }
+

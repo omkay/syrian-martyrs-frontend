@@ -1,6 +1,6 @@
 "use server"
 
-import { getMartyrsWithRelations, searchMartyrs, createMartyr, createContribution, getUserByEmail, createUser, getMartyrById, prisma } from "@/lib/db"
+import { getMartyrsWithRelations, searchMartyrs, createMartyr, createContribution, getUserByEmail, createUser, getMartyrById, prisma, updateUserProfile } from "@/lib/db"
 import { hashPassword, verifyPassword, validatePassword, validateEmail, generateSecureToken } from "@/lib/auth-utils"
 import type { Martyr } from "@/lib/types"
 
@@ -423,6 +423,97 @@ export async function verifyEmail(token: string) {
     return {
       success: false,
       message: "An error occurred while verifying your email. Please try again.",
+    }
+  }
+}
+
+// Profile contribution action
+export async function submitProfileContribution(formData: FormData) {
+  try {
+    // Extract form data
+    const userId = formData.get("userId") as string
+    const contributionType = formData.get("contributionType") as string
+    const name = formData.get("name") as string
+    const email = formData.get("email") as string
+    const bio = formData.get("bio") as string
+    const location = formData.get("location") as string
+    const website = formData.get("website") as string
+    const socialLinks = formData.get("socialLinks") as string
+    const verificationReason = formData.get("verificationReason") as string
+    const correctionDetails = formData.get("correctionDetails") as string
+    const notes = formData.get("notes") as string
+
+    // Simple validation
+    if (!userId) {
+      return { success: false, message: "User ID is required" }
+    }
+
+    if (!contributionType) {
+      return { success: false, message: "Contribution type is required" }
+    }
+
+    // Get user
+    const user = await getUserByEmail(email)
+    if (!user) {
+      return { success: false, message: "User not found" }
+    }
+
+    // Prepare contribution content based on type
+    let contributionContent: any = {
+      name,
+      email,
+      contributionType
+    }
+
+    // Add type-specific content
+    if (contributionType === "profile_creation" || contributionType === "profile_update") {
+      contributionContent = {
+        ...contributionContent,
+        bio: bio || null,
+        location: location || null,
+        website: website || null,
+        socialLinks: socialLinks ? socialLinks.split('\n').filter(link => link.trim()) : null
+      }
+    } else if (contributionType === "profile_verification") {
+      contributionContent = {
+        ...contributionContent,
+        verificationReason
+      }
+    } else if (contributionType === "correction") {
+      contributionContent = {
+        ...contributionContent,
+        correctionDetails
+      }
+    }
+
+    // Create contribution record
+    await createContribution({
+      type: contributionType,
+      userId: user.id,
+      profileId: user.profile?.id || undefined,
+      content: contributionContent,
+      notes: notes || `Profile contribution submitted by ${name} (${email})`
+    })
+
+    // For profile creation, also create/update the profile
+    if (contributionType === "profile_creation") {
+      await updateUserProfile(user.id, {
+        bio: bio || undefined,
+        location: location || undefined,
+        website: website || undefined,
+        socialLinks: socialLinks ? socialLinks.split('\n').filter(link => link.trim()) : undefined
+      })
+    }
+
+    return {
+      success: true,
+      message: "Profile contribution submitted successfully! It will be reviewed before being published. You will be redirected to the martyrs page shortly.",
+    }
+  } catch (error) {
+    console.error("Error submitting profile contribution:", error)
+    return {
+      success: false,
+      message: "An error occurred while submitting your contribution. Please try again.",
     }
   }
 }
