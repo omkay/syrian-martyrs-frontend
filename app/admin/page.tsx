@@ -1,22 +1,79 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
-import { Loader2 } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Loader2, User, Clock, CheckCircle, Users, FileText, TrendingUp, Shield, AlertCircle, ArrowRight } from "lucide-react"
+import Link from "next/link"
+
+interface AdminStats {
+  martyrs: {
+    total: number
+    verified: number
+    unverified: number
+    verificationRate: number
+  }
+  contributions: {
+    total: number
+    pending: number
+    approved: number
+    rejected: number
+    approvalRate: number
+  }
+  users: {
+    total: number
+    admins: number
+    moderators: number
+    regular: number
+  }
+  recentActivity: {
+    contributions: any[]
+    martyrs: any[]
+  }
+}
 
 export default function AdminPage() {
   const { user, isLoading } = useAuth()
   const router = useRouter()
+  const [stats, setStats] = useState<AdminStats | null>(null)
+  const [statsLoading, setStatsLoading] = useState(true)
+  const [statsError, setStatsError] = useState<string | null>(null)
+
+  // Load admin statistics
+  useEffect(() => {
+    if (user) {
+      loadStats()
+    }
+  }, [user])
+
+  const loadStats = async () => {
+    try {
+      setStatsLoading(true)
+      setStatsError(null)
+      
+      const response = await fetch('/api/admin/stats')
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      const data = await response.json()
+      setStats(data)
+    } catch (err) {
+      console.error("Failed to load admin stats:", err)
+      setStatsError(`Failed to load statistics: ${err.message}`)
+    } finally {
+      setStatsLoading(false)
+    }
+  }
 
   // Redirect if not admin
   useEffect(() => {
-    if (!isLoading && (!user || user.role !== "admin")) {
+    if (!isLoading && (!user || user.role !== "ADMIN")) {
       router.push("/login")
     }
   }, [user, isLoading, router])
@@ -29,7 +86,7 @@ export default function AdminPage() {
     )
   }
 
-  if (!user || user.role !== "admin") {
+  if (!user || user.role !== "ADMIN") {
     return null // Will redirect in useEffect
   }
 
@@ -40,178 +97,217 @@ export default function AdminPage() {
       <div className="container py-8">
         <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
 
-        <Tabs defaultValue="contributions">
-          <TabsList className="mb-4">
-            <TabsTrigger value="contributions">Pending Contributions</TabsTrigger>
-            <TabsTrigger value="martyrs">Manage Martyrs</TabsTrigger>
-            <TabsTrigger value="users">Manage Users</TabsTrigger>
-          </TabsList>
+        {/* Overview Section */}
+        <div className="mb-8">
+          {statsLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin" />
+                <span className="ml-2">Loading statistics...</span>
+              </div>
+            ) : statsError ? (
+              <div className="flex items-center justify-center py-8">
+                <AlertCircle className="h-8 w-8 text-red-500" />
+                <span className="ml-2 text-red-500">{statsError}</span>
+              </div>
+            ) : stats ? (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Total Martyrs</CardTitle>
+                      <User className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{stats.martyrs.total}</div>
+                      <p className="text-xs text-muted-foreground">
+                        {stats.martyrs.verificationRate}% verified
+                      </p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Pending Contributions</CardTitle>
+                      <Clock className="h-4 w-4 text-yellow-500" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{stats.contributions.pending}</div>
+                      <p className="text-xs text-muted-foreground">
+                        {stats.contributions.approvalRate}% approval rate
+                      </p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Verified Martyrs</CardTitle>
+                      <Shield className="h-4 w-4 text-green-500" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{stats.martyrs.verified}</div>
+                      <p className="text-xs text-muted-foreground">
+                        {stats.martyrs.unverified} unverified
+                      </p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+                      <Users className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{stats.users.total}</div>
+                      <p className="text-xs text-muted-foreground">
+                        {stats.users.admins} admins, {stats.users.moderators} moderators
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
 
-          <TabsContent value="contributions">
-            <Card>
-              <CardHeader>
-                <CardTitle>Pending Contributions</CardTitle>
-                <CardDescription>Review and approve user-submitted content</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="p-4 border rounded-md">
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <h3 className="font-medium">New Testimonial for Ahmad Khalid</h3>
-                        <p className="text-sm text-muted-foreground">Submitted by: Sarah Johnson (sarah@example.com)</p>
+                {/* Additional Statistics */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Contributions Overview</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-sm">Total</span>
+                          <Badge variant="outline">{stats.contributions.total}</Badge>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm">Approved</span>
+                          <Badge variant="default">{stats.contributions.approved}</Badge>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm">Rejected</span>
+                          <Badge variant="destructive">{stats.contributions.rejected}</Badge>
+                        </div>
                       </div>
-                      <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded dark:bg-yellow-900 dark:text-yellow-200">
-                        Pending
-                      </span>
-                    </div>
-                    <p className="text-sm mb-3">
-                      "Ahmad was a dedicated teacher who inspired many students. His passion for education was evident
-                      in everything he did."
-                    </p>
-                    <div className="flex space-x-2">
-                      <Button size="sm" variant="default">
-                        Approve
-                      </Button>
-                      <Button size="sm" variant="outline">
-                        Reject
-                      </Button>
-                    </div>
-                  </div>
+                    </CardContent>
+                  </Card>
 
-                  <div className="p-4 border rounded-md">
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <h3 className="font-medium">Photo Submission for Layla Ibrahim</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Submitted by: Mohammed Ali (mohammed@example.com)
-                        </p>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">User Roles</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-sm">Admins</span>
+                          <Badge variant="destructive">{stats.users.admins}</Badge>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm">Moderators</span>
+                          <Badge variant="secondary">{stats.users.moderators}</Badge>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm">Users</span>
+                          <Badge variant="outline">{stats.users.regular}</Badge>
+                        </div>
                       </div>
-                      <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded dark:bg-yellow-900 dark:text-yellow-200">
-                        Pending
-                      </span>
-                    </div>
-                    <p className="text-sm mb-3">
-                      "A photo of Layla during her medical school graduation ceremony in 2010."
-                    </p>
-                    <div className="flex space-x-2">
-                      <Button size="sm" variant="default">
-                        Approve
-                      </Button>
-                      <Button size="sm" variant="outline">
-                        Reject
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+                    </CardContent>
+                  </Card>
 
-          <TabsContent value="martyrs">
-            <Card>
-              <CardHeader>
-                <CardTitle>Manage Martyrs</CardTitle>
-                <CardDescription>Add, edit, or remove martyr profiles</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex justify-end mb-4">
-                  <Button>Add New Martyr</Button>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">System Health</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-sm">Verification Rate</span>
+                          <Badge variant={stats.martyrs.verificationRate > 80 ? "default" : "secondary"}>
+                            {stats.martyrs.verificationRate}%
+                          </Badge>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm">Approval Rate</span>
+                          <Badge variant={stats.contributions.approvalRate > 70 ? "default" : "secondary"}>
+                            {stats.contributions.approvalRate}%
+                          </Badge>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
+              </>
+            ) : null}
+        </div>
 
-                <div className="border rounded-md overflow-hidden">
-                  <table className="w-full">
-                    <thead className="bg-muted">
-                      <tr>
-                        <th className="text-left p-3">Name</th>
-                        <th className="text-left p-3">Date</th>
-                        <th className="text-left p-3">Location</th>
-                        <th className="text-left p-3">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr className="border-t">
-                        <td className="p-3">Ahmad Khalid</td>
-                        <td className="p-3">March 15, 2011</td>
-                        <td className="p-3">Daraa</td>
-                        <td className="p-3">
-                          <div className="flex space-x-2">
-                            <Button size="sm" variant="outline">
-                              Edit
-                            </Button>
-                            <Button size="sm" variant="outline" className="text-destructive">
-                              Delete
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                      <tr className="border-t">
-                        <td className="p-3">Layla Ibrahim</td>
-                        <td className="p-3">April 22, 2011</td>
-                        <td className="p-3">Homs</td>
-                        <td className="p-3">
-                          <div className="flex space-x-2">
-                            <Button size="sm" variant="outline">
-                              Edit
-                            </Button>
-                            <Button size="sm" variant="outline" className="text-destructive">
-                              Delete
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+          {/* Action Cards */}
+          <div className="mt-8">
+            <h2 className="text-2xl font-bold mb-6">Admin Actions</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <FileText className="h-5 w-5 mr-2" />
+                    Review Contributions
+                  </CardTitle>
+                  <CardDescription>
+                    Review and approve user testimonials and corrections
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Manage user-submitted testimonials, corrections, and other contributions to the memorial.
+                  </p>
+                  <Button asChild className="w-full">
+                    <Link href="/admin/contributions">
+                      Go to Contributions
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
 
-          <TabsContent value="users">
-            <Card>
-              <CardHeader>
-                <CardTitle>Manage Users</CardTitle>
-                <CardDescription>View and manage user accounts</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="border rounded-md overflow-hidden">
-                  <table className="w-full">
-                    <thead className="bg-muted">
-                      <tr>
-                        <th className="text-left p-3">Name</th>
-                        <th className="text-left p-3">Email</th>
-                        <th className="text-left p-3">Role</th>
-                        <th className="text-left p-3">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr className="border-t">
-                        <td className="p-3">Admin User</td>
-                        <td className="p-3">admin@example.com</td>
-                        <td className="p-3">Admin</td>
-                        <td className="p-3">
-                          <Button size="sm" variant="outline">
-                            Edit
-                          </Button>
-                        </td>
-                      </tr>
-                      <tr className="border-t">
-                        <td className="p-3">Regular User</td>
-                        <td className="p-3">user@example.com</td>
-                        <td className="p-3">User</td>
-                        <td className="p-3">
-                          <Button size="sm" variant="outline">
-                            Edit
-                          </Button>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <User className="h-5 w-5 mr-2" />
+                    Manage Martyrs
+                  </CardTitle>
+                  <CardDescription>
+                    Review and approve new martyr profiles
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Review martyr additions submitted by users and manage martyr verification status.
+                  </p>
+                  <Button asChild className="w-full">
+                    <Link href="/admin/martyrs">
+                      Go to Martyrs
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Users className="h-5 w-5 mr-2" />
+                    Manage Users
+                  </CardTitle>
+                  <CardDescription>
+                    Manage user accounts and permissions
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Manage user accounts, roles, permissions, and verification status.
+                  </p>
+                  <Button asChild className="w-full">
+                    <Link href="/admin/users">
+                      Go to Users
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
       </div>
 
       <Footer />
