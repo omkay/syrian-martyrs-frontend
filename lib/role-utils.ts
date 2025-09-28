@@ -130,5 +130,10 @@ export function hasPermission(
   isVerified: boolean = true
 ): boolean {
   const permissionFn = PERMISSIONS[permission]
-  return permissionFn(userRole, isVerified)
+  // Check if the permission function expects 2 parameters (role and isVerified)
+  if (permission === 'SUBMIT_CONTRIBUTIONS' || permission === 'EDIT_OWN_PROFILE' || permission === 'VIEW_OWN_CONTRIBUTIONS') {
+    return permissionFn(userRole, isVerified)
+  }
+  // For other permissions, only pass the role
+  return permissionFn(userRole)
 }

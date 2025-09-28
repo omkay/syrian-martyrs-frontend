@@ -35,6 +35,9 @@ export function verifyToken(token: string): JWTPayload | null {
   }
 }
 
+// Alias for verifyToken for consistency
+export const verifyJWT = verifyToken
+
 // Password validation
 export function validatePassword(password: string): { isValid: boolean; errors: string[] } {
   const errors: string[] = []

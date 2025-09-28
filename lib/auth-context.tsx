@@ -63,9 +63,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const result = await loginUser(email, password)
       
       if (result.success && result.user) {
-        setUser(result.user)
+        const userWithToken = {
+          ...result.user,
+          token: result.token
+        }
+        setUser(userWithToken)
         try {
-          localStorage.setItem("user", JSON.stringify(result.user))
+          localStorage.setItem("user", JSON.stringify(userWithToken))
         } catch (e) {
           console.error("Failed to store user in localStorage:", e)
         }

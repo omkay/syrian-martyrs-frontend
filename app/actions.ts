@@ -1,7 +1,7 @@
 "use server"
 
 import { getMartyrsWithRelations, searchMartyrs, createMartyr, createContribution, getUserByEmail, createUser, getMartyrById, prisma, updateUserProfile } from "@/lib/db"
-import { hashPassword, verifyPassword, validatePassword, validateEmail, generateSecureToken } from "@/lib/auth-utils"
+import { hashPassword, verifyPassword, validatePassword, validateEmail, generateSecureToken, generateToken } from "@/lib/auth-utils"
 import type { Martyr } from "@/lib/types"
 
 // Helper function to get or create a user for anonymous submissions
@@ -374,12 +374,20 @@ export async function loginUser(email: string, password: string) {
       data: { lastLoginAt: new Date() }
     })
 
-    // Return user data (without password)
+    // Generate JWT token
+    const token = generateToken({
+      userId: user.id,
+      email: user.email,
+      role: user.role
+    })
+
+    // Return user data (without password) with token
     const { password: _, ...userWithoutPassword } = user
     return {
       success: true,
       message: "Login successful",
-      user: userWithoutPassword
+      user: userWithoutPassword,
+      token
     }
   } catch (error) {
     console.error("Error during login:", error)
