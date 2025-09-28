@@ -30,7 +30,7 @@ interface ContributionFormProps {
 
 export function ContributionForm({ martyrId, martyrName }: ContributionFormProps) {
   const [open, setOpen] = useState(false)
-  const [contributionType, setContributionType] = useState<string>("testimonial")
+  const [contributionType, setContributionType] = useState<string>("TESTIMONIAL_ADDITION")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formState, setFormState] = useState<{
     success?: boolean
@@ -62,7 +62,7 @@ export function ContributionForm({ martyrId, martyrName }: ContributionFormProps
       if (result.success) {
         // Reset form on success
         form.reset()
-        setContributionType("testimonial")
+        setContributionType("TESTIMONIAL_ADDITION")
 
         // Close dialog after delay
         setTimeout(() => setOpen(false), 3000)
@@ -117,10 +117,10 @@ export function ContributionForm({ martyrId, martyrName }: ContributionFormProps
                 <SelectValue placeholder="Select type of contribution" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="testimonial">Personal Testimonial</SelectItem>
-                <SelectItem value="photo">Photo</SelectItem>
-                <SelectItem value="document">Document or Link</SelectItem>
-                <SelectItem value="information">Additional Information</SelectItem>
+                <SelectItem value="TESTIMONIAL_ADDITION">Personal Testimonial</SelectItem>
+                <SelectItem value="PHOTO_ADDITION">Photo</SelectItem>
+                <SelectItem value="DOCUMENT_ADDITION">Document or Link</SelectItem>
+                <SelectItem value="OTHER">Additional Information</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -134,7 +134,7 @@ export function ContributionForm({ martyrId, martyrName }: ContributionFormProps
             <Input id="relationship" name="relationship" placeholder="Family member, friend, colleague, etc." />
           </div>
 
-          {contributionType === "testimonial" && (
+          {contributionType === "TESTIMONIAL_ADDITION" && (
             <div className="space-y-2">
               <Label htmlFor="content">Your Testimonial</Label>
               <Textarea
@@ -147,7 +147,7 @@ export function ContributionForm({ martyrId, martyrName }: ContributionFormProps
             </div>
           )}
 
-          {contributionType === "photo" && (
+          {contributionType === "PHOTO_ADDITION" && (
             <>
               <div className="space-y-2">
                 <Label htmlFor="url">Photo URL</Label>
@@ -168,7 +168,7 @@ export function ContributionForm({ martyrId, martyrName }: ContributionFormProps
             </>
           )}
 
-          {contributionType === "document" && (
+          {contributionType === "DOCUMENT_ADDITION" && (
             <>
               <div className="space-y-2">
                 <Label htmlFor="url">Document or Link URL</Label>
@@ -188,7 +188,7 @@ export function ContributionForm({ martyrId, martyrName }: ContributionFormProps
             </>
           )}
 
-          {contributionType === "information" && (
+          {contributionType === "OTHER" && (
             <div className="space-y-2">
               <Label htmlFor="content">Additional Information</Label>
               <Textarea

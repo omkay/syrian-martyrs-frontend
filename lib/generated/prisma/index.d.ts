@@ -83,6 +83,11 @@ export const ContributionType: {
   MARTYR_UPDATE: 'MARTYR_UPDATE',
   TESTIMONIAL_ADDITION: 'TESTIMONIAL_ADDITION',
   SOURCE_ADDITION: 'SOURCE_ADDITION',
+  PHOTO_ADDITION: 'PHOTO_ADDITION',
+  DOCUMENT_ADDITION: 'DOCUMENT_ADDITION',
+  PROFILE_CREATION: 'PROFILE_CREATION',
+  PROFILE_UPDATE: 'PROFILE_UPDATE',
+  PROFILE_VERIFICATION: 'PROFILE_VERIFICATION',
   CORRECTION: 'CORRECTION',
   OTHER: 'OTHER'
 };
@@ -1420,6 +1425,37 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountTestimonialsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: TestimonialWhereInput
+  }
+
+
+  /**
+   * Count Type ProfileCountOutputType
+   */
+
+  export type ProfileCountOutputType = {
+    contributions: number
+  }
+
+  export type ProfileCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    contributions?: boolean | ProfileCountOutputTypeCountContributionsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * ProfileCountOutputType without action
+   */
+  export type ProfileCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfileCountOutputType
+     */
+    select?: ProfileCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * ProfileCountOutputType without action
+   */
+  export type ProfileCountOutputTypeCountContributionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ContributionWhereInput
   }
 
 
@@ -2777,7 +2813,10 @@ export namespace Prisma {
     bio: string | null
     avatar: string | null
     location: string | null
+    address: string | null
+    phone: string | null
     website: string | null
+    isVerified: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -2788,7 +2827,10 @@ export namespace Prisma {
     bio: string | null
     avatar: string | null
     location: string | null
+    address: string | null
+    phone: string | null
     website: string | null
+    isVerified: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -2799,8 +2841,11 @@ export namespace Prisma {
     bio: number
     avatar: number
     location: number
+    address: number
+    phone: number
     website: number
     socialLinks: number
+    isVerified: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -2813,7 +2858,10 @@ export namespace Prisma {
     bio?: true
     avatar?: true
     location?: true
+    address?: true
+    phone?: true
     website?: true
+    isVerified?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -2824,7 +2872,10 @@ export namespace Prisma {
     bio?: true
     avatar?: true
     location?: true
+    address?: true
+    phone?: true
     website?: true
+    isVerified?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -2835,8 +2886,11 @@ export namespace Prisma {
     bio?: true
     avatar?: true
     location?: true
+    address?: true
+    phone?: true
     website?: true
     socialLinks?: true
+    isVerified?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -2920,8 +2974,11 @@ export namespace Prisma {
     bio: string | null
     avatar: string | null
     location: string | null
+    address: string | null
+    phone: string | null
     website: string | null
     socialLinks: JsonValue | null
+    isVerified: boolean
     createdAt: Date
     updatedAt: Date
     _count: ProfileCountAggregateOutputType | null
@@ -2949,11 +3006,16 @@ export namespace Prisma {
     bio?: boolean
     avatar?: boolean
     location?: boolean
+    address?: boolean
+    phone?: boolean
     website?: boolean
     socialLinks?: boolean
+    isVerified?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
+    contributions?: boolean | Profile$contributionsArgs<ExtArgs>
+    _count?: boolean | ProfileCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["profile"]>
 
   export type ProfileSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -2962,8 +3024,11 @@ export namespace Prisma {
     bio?: boolean
     avatar?: boolean
     location?: boolean
+    address?: boolean
+    phone?: boolean
     website?: boolean
     socialLinks?: boolean
+    isVerified?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -2975,8 +3040,11 @@ export namespace Prisma {
     bio?: boolean
     avatar?: boolean
     location?: boolean
+    address?: boolean
+    phone?: boolean
     website?: boolean
     socialLinks?: boolean
+    isVerified?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -2988,15 +3056,20 @@ export namespace Prisma {
     bio?: boolean
     avatar?: boolean
     location?: boolean
+    address?: boolean
+    phone?: boolean
     website?: boolean
     socialLinks?: boolean
+    isVerified?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type ProfileOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "bio" | "avatar" | "location" | "website" | "socialLinks" | "createdAt" | "updatedAt", ExtArgs["result"]["profile"]>
+  export type ProfileOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "bio" | "avatar" | "location" | "address" | "phone" | "website" | "socialLinks" | "isVerified" | "createdAt" | "updatedAt", ExtArgs["result"]["profile"]>
   export type ProfileInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
+    contributions?: boolean | Profile$contributionsArgs<ExtArgs>
+    _count?: boolean | ProfileCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ProfileIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -3009,6 +3082,7 @@ export namespace Prisma {
     name: "Profile"
     objects: {
       user: Prisma.$UserPayload<ExtArgs>
+      contributions: Prisma.$ContributionPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -3016,8 +3090,11 @@ export namespace Prisma {
       bio: string | null
       avatar: string | null
       location: string | null
+      address: string | null
+      phone: string | null
       website: string | null
       socialLinks: Prisma.JsonValue | null
+      isVerified: boolean
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["profile"]>
@@ -3415,6 +3492,7 @@ export namespace Prisma {
   export interface Prisma__ProfileClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    contributions<T extends Profile$contributionsArgs<ExtArgs> = {}>(args?: Subset<T, Profile$contributionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ContributionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3449,8 +3527,11 @@ export namespace Prisma {
     readonly bio: FieldRef<"Profile", 'String'>
     readonly avatar: FieldRef<"Profile", 'String'>
     readonly location: FieldRef<"Profile", 'String'>
+    readonly address: FieldRef<"Profile", 'String'>
+    readonly phone: FieldRef<"Profile", 'String'>
     readonly website: FieldRef<"Profile", 'String'>
     readonly socialLinks: FieldRef<"Profile", 'Json'>
+    readonly isVerified: FieldRef<"Profile", 'Boolean'>
     readonly createdAt: FieldRef<"Profile", 'DateTime'>
     readonly updatedAt: FieldRef<"Profile", 'DateTime'>
   }
@@ -3846,6 +3927,30 @@ export namespace Prisma {
      * Limit how many Profiles to delete.
      */
     limit?: number
+  }
+
+  /**
+   * Profile.contributions
+   */
+  export type Profile$contributionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Contribution
+     */
+    select?: ContributionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Contribution
+     */
+    omit?: ContributionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ContributionInclude<ExtArgs> | null
+    where?: ContributionWhereInput
+    orderBy?: ContributionOrderByWithRelationInput | ContributionOrderByWithRelationInput[]
+    cursor?: ContributionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ContributionScalarFieldEnum | ContributionScalarFieldEnum[]
   }
 
   /**
@@ -7448,6 +7553,7 @@ export namespace Prisma {
     updatedAt: Date | null
     userId: string | null
     martyrId: string | null
+    profileId: string | null
   }
 
   export type ContributionMaxAggregateOutputType = {
@@ -7459,6 +7565,7 @@ export namespace Prisma {
     updatedAt: Date | null
     userId: string | null
     martyrId: string | null
+    profileId: string | null
   }
 
   export type ContributionCountAggregateOutputType = {
@@ -7471,6 +7578,7 @@ export namespace Prisma {
     updatedAt: number
     userId: number
     martyrId: number
+    profileId: number
     _all: number
   }
 
@@ -7484,6 +7592,7 @@ export namespace Prisma {
     updatedAt?: true
     userId?: true
     martyrId?: true
+    profileId?: true
   }
 
   export type ContributionMaxAggregateInputType = {
@@ -7495,6 +7604,7 @@ export namespace Prisma {
     updatedAt?: true
     userId?: true
     martyrId?: true
+    profileId?: true
   }
 
   export type ContributionCountAggregateInputType = {
@@ -7507,6 +7617,7 @@ export namespace Prisma {
     updatedAt?: true
     userId?: true
     martyrId?: true
+    profileId?: true
     _all?: true
   }
 
@@ -7592,6 +7703,7 @@ export namespace Prisma {
     updatedAt: Date
     userId: string
     martyrId: string | null
+    profileId: string | null
     _count: ContributionCountAggregateOutputType | null
     _min: ContributionMinAggregateOutputType | null
     _max: ContributionMaxAggregateOutputType | null
@@ -7621,8 +7733,10 @@ export namespace Prisma {
     updatedAt?: boolean
     userId?: boolean
     martyrId?: boolean
+    profileId?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     martyr?: boolean | Contribution$martyrArgs<ExtArgs>
+    profile?: boolean | Contribution$profileArgs<ExtArgs>
   }, ExtArgs["result"]["contribution"]>
 
   export type ContributionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -7635,8 +7749,10 @@ export namespace Prisma {
     updatedAt?: boolean
     userId?: boolean
     martyrId?: boolean
+    profileId?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     martyr?: boolean | Contribution$martyrArgs<ExtArgs>
+    profile?: boolean | Contribution$profileArgs<ExtArgs>
   }, ExtArgs["result"]["contribution"]>
 
   export type ContributionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -7649,8 +7765,10 @@ export namespace Prisma {
     updatedAt?: boolean
     userId?: boolean
     martyrId?: boolean
+    profileId?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     martyr?: boolean | Contribution$martyrArgs<ExtArgs>
+    profile?: boolean | Contribution$profileArgs<ExtArgs>
   }, ExtArgs["result"]["contribution"]>
 
   export type ContributionSelectScalar = {
@@ -7663,20 +7781,24 @@ export namespace Prisma {
     updatedAt?: boolean
     userId?: boolean
     martyrId?: boolean
+    profileId?: boolean
   }
 
-  export type ContributionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "type" | "status" | "content" | "notes" | "createdAt" | "updatedAt" | "userId" | "martyrId", ExtArgs["result"]["contribution"]>
+  export type ContributionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "type" | "status" | "content" | "notes" | "createdAt" | "updatedAt" | "userId" | "martyrId" | "profileId", ExtArgs["result"]["contribution"]>
   export type ContributionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     martyr?: boolean | Contribution$martyrArgs<ExtArgs>
+    profile?: boolean | Contribution$profileArgs<ExtArgs>
   }
   export type ContributionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     martyr?: boolean | Contribution$martyrArgs<ExtArgs>
+    profile?: boolean | Contribution$profileArgs<ExtArgs>
   }
   export type ContributionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     martyr?: boolean | Contribution$martyrArgs<ExtArgs>
+    profile?: boolean | Contribution$profileArgs<ExtArgs>
   }
 
   export type $ContributionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -7684,6 +7806,7 @@ export namespace Prisma {
     objects: {
       user: Prisma.$UserPayload<ExtArgs>
       martyr: Prisma.$MartyrPayload<ExtArgs> | null
+      profile: Prisma.$ProfilePayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -7695,6 +7818,7 @@ export namespace Prisma {
       updatedAt: Date
       userId: string
       martyrId: string | null
+      profileId: string | null
     }, ExtArgs["result"]["contribution"]>
     composites: {}
   }
@@ -8091,6 +8215,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     martyr<T extends Contribution$martyrArgs<ExtArgs> = {}>(args?: Subset<T, Contribution$martyrArgs<ExtArgs>>): Prisma__MartyrClient<$Result.GetResult<Prisma.$MartyrPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    profile<T extends Contribution$profileArgs<ExtArgs> = {}>(args?: Subset<T, Contribution$profileArgs<ExtArgs>>): Prisma__ProfileClient<$Result.GetResult<Prisma.$ProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -8129,6 +8254,7 @@ export namespace Prisma {
     readonly updatedAt: FieldRef<"Contribution", 'DateTime'>
     readonly userId: FieldRef<"Contribution", 'String'>
     readonly martyrId: FieldRef<"Contribution", 'String'>
+    readonly profileId: FieldRef<"Contribution", 'String'>
   }
     
 
@@ -8544,6 +8670,25 @@ export namespace Prisma {
   }
 
   /**
+   * Contribution.profile
+   */
+  export type Contribution$profileArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Profile
+     */
+    select?: ProfileSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Profile
+     */
+    omit?: ProfileOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProfileInclude<ExtArgs> | null
+    where?: ProfileWhereInput
+  }
+
+  /**
    * Contribution without action
    */
   export type ContributionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -8603,8 +8748,11 @@ export namespace Prisma {
     bio: 'bio',
     avatar: 'avatar',
     location: 'location',
+    address: 'address',
+    phone: 'phone',
     website: 'website',
     socialLinks: 'socialLinks',
+    isVerified: 'isVerified',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -8671,7 +8819,8 @@ export namespace Prisma {
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     userId: 'userId',
-    martyrId: 'martyrId'
+    martyrId: 'martyrId',
+    profileId: 'profileId'
   };
 
   export type ContributionScalarFieldEnum = (typeof ContributionScalarFieldEnum)[keyof typeof ContributionScalarFieldEnum]
@@ -9002,11 +9151,15 @@ export namespace Prisma {
     bio?: StringNullableFilter<"Profile"> | string | null
     avatar?: StringNullableFilter<"Profile"> | string | null
     location?: StringNullableFilter<"Profile"> | string | null
+    address?: StringNullableFilter<"Profile"> | string | null
+    phone?: StringNullableFilter<"Profile"> | string | null
     website?: StringNullableFilter<"Profile"> | string | null
     socialLinks?: JsonNullableFilter<"Profile">
+    isVerified?: BoolFilter<"Profile"> | boolean
     createdAt?: DateTimeFilter<"Profile"> | Date | string
     updatedAt?: DateTimeFilter<"Profile"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    contributions?: ContributionListRelationFilter
   }
 
   export type ProfileOrderByWithRelationInput = {
@@ -9015,11 +9168,15 @@ export namespace Prisma {
     bio?: SortOrderInput | SortOrder
     avatar?: SortOrderInput | SortOrder
     location?: SortOrderInput | SortOrder
+    address?: SortOrderInput | SortOrder
+    phone?: SortOrderInput | SortOrder
     website?: SortOrderInput | SortOrder
     socialLinks?: SortOrderInput | SortOrder
+    isVerified?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
+    contributions?: ContributionOrderByRelationAggregateInput
   }
 
   export type ProfileWhereUniqueInput = Prisma.AtLeast<{
@@ -9031,11 +9188,15 @@ export namespace Prisma {
     bio?: StringNullableFilter<"Profile"> | string | null
     avatar?: StringNullableFilter<"Profile"> | string | null
     location?: StringNullableFilter<"Profile"> | string | null
+    address?: StringNullableFilter<"Profile"> | string | null
+    phone?: StringNullableFilter<"Profile"> | string | null
     website?: StringNullableFilter<"Profile"> | string | null
     socialLinks?: JsonNullableFilter<"Profile">
+    isVerified?: BoolFilter<"Profile"> | boolean
     createdAt?: DateTimeFilter<"Profile"> | Date | string
     updatedAt?: DateTimeFilter<"Profile"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    contributions?: ContributionListRelationFilter
   }, "id" | "userId">
 
   export type ProfileOrderByWithAggregationInput = {
@@ -9044,8 +9205,11 @@ export namespace Prisma {
     bio?: SortOrderInput | SortOrder
     avatar?: SortOrderInput | SortOrder
     location?: SortOrderInput | SortOrder
+    address?: SortOrderInput | SortOrder
+    phone?: SortOrderInput | SortOrder
     website?: SortOrderInput | SortOrder
     socialLinks?: SortOrderInput | SortOrder
+    isVerified?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: ProfileCountOrderByAggregateInput
@@ -9062,8 +9226,11 @@ export namespace Prisma {
     bio?: StringNullableWithAggregatesFilter<"Profile"> | string | null
     avatar?: StringNullableWithAggregatesFilter<"Profile"> | string | null
     location?: StringNullableWithAggregatesFilter<"Profile"> | string | null
+    address?: StringNullableWithAggregatesFilter<"Profile"> | string | null
+    phone?: StringNullableWithAggregatesFilter<"Profile"> | string | null
     website?: StringNullableWithAggregatesFilter<"Profile"> | string | null
     socialLinks?: JsonNullableWithAggregatesFilter<"Profile">
+    isVerified?: BoolWithAggregatesFilter<"Profile"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"Profile"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Profile"> | Date | string
   }
@@ -9342,8 +9509,10 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Contribution"> | Date | string
     userId?: StringFilter<"Contribution"> | string
     martyrId?: StringNullableFilter<"Contribution"> | string | null
+    profileId?: StringNullableFilter<"Contribution"> | string | null
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     martyr?: XOR<MartyrNullableScalarRelationFilter, MartyrWhereInput> | null
+    profile?: XOR<ProfileNullableScalarRelationFilter, ProfileWhereInput> | null
   }
 
   export type ContributionOrderByWithRelationInput = {
@@ -9356,8 +9525,10 @@ export namespace Prisma {
     updatedAt?: SortOrder
     userId?: SortOrder
     martyrId?: SortOrderInput | SortOrder
+    profileId?: SortOrderInput | SortOrder
     user?: UserOrderByWithRelationInput
     martyr?: MartyrOrderByWithRelationInput
+    profile?: ProfileOrderByWithRelationInput
   }
 
   export type ContributionWhereUniqueInput = Prisma.AtLeast<{
@@ -9373,8 +9544,10 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Contribution"> | Date | string
     userId?: StringFilter<"Contribution"> | string
     martyrId?: StringNullableFilter<"Contribution"> | string | null
+    profileId?: StringNullableFilter<"Contribution"> | string | null
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     martyr?: XOR<MartyrNullableScalarRelationFilter, MartyrWhereInput> | null
+    profile?: XOR<ProfileNullableScalarRelationFilter, ProfileWhereInput> | null
   }, "id">
 
   export type ContributionOrderByWithAggregationInput = {
@@ -9387,6 +9560,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     userId?: SortOrder
     martyrId?: SortOrderInput | SortOrder
+    profileId?: SortOrderInput | SortOrder
     _count?: ContributionCountOrderByAggregateInput
     _max?: ContributionMaxOrderByAggregateInput
     _min?: ContributionMinOrderByAggregateInput
@@ -9405,6 +9579,7 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"Contribution"> | Date | string
     userId?: StringWithAggregatesFilter<"Contribution"> | string
     martyrId?: StringNullableWithAggregatesFilter<"Contribution"> | string | null
+    profileId?: StringNullableWithAggregatesFilter<"Contribution"> | string | null
   }
 
   export type UserCreateInput = {
@@ -9550,11 +9725,15 @@ export namespace Prisma {
     bio?: string | null
     avatar?: string | null
     location?: string | null
+    address?: string | null
+    phone?: string | null
     website?: string | null
     socialLinks?: NullableJsonNullValueInput | InputJsonValue
+    isVerified?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutProfileInput
+    contributions?: ContributionCreateNestedManyWithoutProfileInput
   }
 
   export type ProfileUncheckedCreateInput = {
@@ -9563,10 +9742,14 @@ export namespace Prisma {
     bio?: string | null
     avatar?: string | null
     location?: string | null
+    address?: string | null
+    phone?: string | null
     website?: string | null
     socialLinks?: NullableJsonNullValueInput | InputJsonValue
+    isVerified?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    contributions?: ContributionUncheckedCreateNestedManyWithoutProfileInput
   }
 
   export type ProfileUpdateInput = {
@@ -9574,11 +9757,15 @@ export namespace Prisma {
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
     socialLinks?: NullableJsonNullValueInput | InputJsonValue
+    isVerified?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutProfileNestedInput
+    contributions?: ContributionUpdateManyWithoutProfileNestedInput
   }
 
   export type ProfileUncheckedUpdateInput = {
@@ -9587,10 +9774,14 @@ export namespace Prisma {
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
     socialLinks?: NullableJsonNullValueInput | InputJsonValue
+    isVerified?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    contributions?: ContributionUncheckedUpdateManyWithoutProfileNestedInput
   }
 
   export type ProfileCreateManyInput = {
@@ -9599,8 +9790,11 @@ export namespace Prisma {
     bio?: string | null
     avatar?: string | null
     location?: string | null
+    address?: string | null
+    phone?: string | null
     website?: string | null
     socialLinks?: NullableJsonNullValueInput | InputJsonValue
+    isVerified?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -9610,8 +9804,11 @@ export namespace Prisma {
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
     socialLinks?: NullableJsonNullValueInput | InputJsonValue
+    isVerified?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -9622,8 +9819,11 @@ export namespace Prisma {
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
     socialLinks?: NullableJsonNullValueInput | InputJsonValue
+    isVerified?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -9934,6 +10134,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutContributionsInput
     martyr?: MartyrCreateNestedOneWithoutContributionsInput
+    profile?: ProfileCreateNestedOneWithoutContributionsInput
   }
 
   export type ContributionUncheckedCreateInput = {
@@ -9946,6 +10147,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     userId: string
     martyrId?: string | null
+    profileId?: string | null
   }
 
   export type ContributionUpdateInput = {
@@ -9958,6 +10160,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutContributionsNestedInput
     martyr?: MartyrUpdateOneWithoutContributionsNestedInput
+    profile?: ProfileUpdateOneWithoutContributionsNestedInput
   }
 
   export type ContributionUncheckedUpdateInput = {
@@ -9970,6 +10173,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     userId?: StringFieldUpdateOperationsInput | string
     martyrId?: NullableStringFieldUpdateOperationsInput | string | null
+    profileId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ContributionCreateManyInput = {
@@ -9982,6 +10186,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     userId: string
     martyrId?: string | null
+    profileId?: string | null
   }
 
   export type ContributionUpdateManyMutationInput = {
@@ -10004,6 +10209,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     userId?: StringFieldUpdateOperationsInput | string
     martyrId?: NullableStringFieldUpdateOperationsInput | string | null
+    profileId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type StringFilter<$PrismaModel = never> = {
@@ -10305,8 +10511,11 @@ export namespace Prisma {
     bio?: SortOrder
     avatar?: SortOrder
     location?: SortOrder
+    address?: SortOrder
+    phone?: SortOrder
     website?: SortOrder
     socialLinks?: SortOrder
+    isVerified?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -10317,7 +10526,10 @@ export namespace Prisma {
     bio?: SortOrder
     avatar?: SortOrder
     location?: SortOrder
+    address?: SortOrder
+    phone?: SortOrder
     website?: SortOrder
+    isVerified?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -10328,7 +10540,10 @@ export namespace Prisma {
     bio?: SortOrder
     avatar?: SortOrder
     location?: SortOrder
+    address?: SortOrder
+    phone?: SortOrder
     website?: SortOrder
+    isVerified?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -10618,6 +10833,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     userId?: SortOrder
     martyrId?: SortOrder
+    profileId?: SortOrder
   }
 
   export type ContributionMaxOrderByAggregateInput = {
@@ -10629,6 +10845,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     userId?: SortOrder
     martyrId?: SortOrder
+    profileId?: SortOrder
   }
 
   export type ContributionMinOrderByAggregateInput = {
@@ -10640,6 +10857,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     userId?: SortOrder
     martyrId?: SortOrder
+    profileId?: SortOrder
   }
 
   export type EnumContributionTypeWithAggregatesFilter<$PrismaModel = never> = {
@@ -10842,12 +11060,54 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
+  export type ContributionCreateNestedManyWithoutProfileInput = {
+    create?: XOR<ContributionCreateWithoutProfileInput, ContributionUncheckedCreateWithoutProfileInput> | ContributionCreateWithoutProfileInput[] | ContributionUncheckedCreateWithoutProfileInput[]
+    connectOrCreate?: ContributionCreateOrConnectWithoutProfileInput | ContributionCreateOrConnectWithoutProfileInput[]
+    createMany?: ContributionCreateManyProfileInputEnvelope
+    connect?: ContributionWhereUniqueInput | ContributionWhereUniqueInput[]
+  }
+
+  export type ContributionUncheckedCreateNestedManyWithoutProfileInput = {
+    create?: XOR<ContributionCreateWithoutProfileInput, ContributionUncheckedCreateWithoutProfileInput> | ContributionCreateWithoutProfileInput[] | ContributionUncheckedCreateWithoutProfileInput[]
+    connectOrCreate?: ContributionCreateOrConnectWithoutProfileInput | ContributionCreateOrConnectWithoutProfileInput[]
+    createMany?: ContributionCreateManyProfileInputEnvelope
+    connect?: ContributionWhereUniqueInput | ContributionWhereUniqueInput[]
+  }
+
   export type UserUpdateOneRequiredWithoutProfileNestedInput = {
     create?: XOR<UserCreateWithoutProfileInput, UserUncheckedCreateWithoutProfileInput>
     connectOrCreate?: UserCreateOrConnectWithoutProfileInput
     upsert?: UserUpsertWithoutProfileInput
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutProfileInput, UserUpdateWithoutProfileInput>, UserUncheckedUpdateWithoutProfileInput>
+  }
+
+  export type ContributionUpdateManyWithoutProfileNestedInput = {
+    create?: XOR<ContributionCreateWithoutProfileInput, ContributionUncheckedCreateWithoutProfileInput> | ContributionCreateWithoutProfileInput[] | ContributionUncheckedCreateWithoutProfileInput[]
+    connectOrCreate?: ContributionCreateOrConnectWithoutProfileInput | ContributionCreateOrConnectWithoutProfileInput[]
+    upsert?: ContributionUpsertWithWhereUniqueWithoutProfileInput | ContributionUpsertWithWhereUniqueWithoutProfileInput[]
+    createMany?: ContributionCreateManyProfileInputEnvelope
+    set?: ContributionWhereUniqueInput | ContributionWhereUniqueInput[]
+    disconnect?: ContributionWhereUniqueInput | ContributionWhereUniqueInput[]
+    delete?: ContributionWhereUniqueInput | ContributionWhereUniqueInput[]
+    connect?: ContributionWhereUniqueInput | ContributionWhereUniqueInput[]
+    update?: ContributionUpdateWithWhereUniqueWithoutProfileInput | ContributionUpdateWithWhereUniqueWithoutProfileInput[]
+    updateMany?: ContributionUpdateManyWithWhereWithoutProfileInput | ContributionUpdateManyWithWhereWithoutProfileInput[]
+    deleteMany?: ContributionScalarWhereInput | ContributionScalarWhereInput[]
+  }
+
+  export type ContributionUncheckedUpdateManyWithoutProfileNestedInput = {
+    create?: XOR<ContributionCreateWithoutProfileInput, ContributionUncheckedCreateWithoutProfileInput> | ContributionCreateWithoutProfileInput[] | ContributionUncheckedCreateWithoutProfileInput[]
+    connectOrCreate?: ContributionCreateOrConnectWithoutProfileInput | ContributionCreateOrConnectWithoutProfileInput[]
+    upsert?: ContributionUpsertWithWhereUniqueWithoutProfileInput | ContributionUpsertWithWhereUniqueWithoutProfileInput[]
+    createMany?: ContributionCreateManyProfileInputEnvelope
+    set?: ContributionWhereUniqueInput | ContributionWhereUniqueInput[]
+    disconnect?: ContributionWhereUniqueInput | ContributionWhereUniqueInput[]
+    delete?: ContributionWhereUniqueInput | ContributionWhereUniqueInput[]
+    connect?: ContributionWhereUniqueInput | ContributionWhereUniqueInput[]
+    update?: ContributionUpdateWithWhereUniqueWithoutProfileInput | ContributionUpdateWithWhereUniqueWithoutProfileInput[]
+    updateMany?: ContributionUpdateManyWithWhereWithoutProfileInput | ContributionUpdateManyWithWhereWithoutProfileInput[]
+    deleteMany?: ContributionScalarWhereInput | ContributionScalarWhereInput[]
   }
 
   export type TestimonialCreateNestedManyWithoutMartyrInput = {
@@ -11052,6 +11312,12 @@ export namespace Prisma {
     connect?: MartyrWhereUniqueInput
   }
 
+  export type ProfileCreateNestedOneWithoutContributionsInput = {
+    create?: XOR<ProfileCreateWithoutContributionsInput, ProfileUncheckedCreateWithoutContributionsInput>
+    connectOrCreate?: ProfileCreateOrConnectWithoutContributionsInput
+    connect?: ProfileWhereUniqueInput
+  }
+
   export type EnumContributionTypeFieldUpdateOperationsInput = {
     set?: $Enums.ContributionType
   }
@@ -11076,6 +11342,16 @@ export namespace Prisma {
     delete?: MartyrWhereInput | boolean
     connect?: MartyrWhereUniqueInput
     update?: XOR<XOR<MartyrUpdateToOneWithWhereWithoutContributionsInput, MartyrUpdateWithoutContributionsInput>, MartyrUncheckedUpdateWithoutContributionsInput>
+  }
+
+  export type ProfileUpdateOneWithoutContributionsNestedInput = {
+    create?: XOR<ProfileCreateWithoutContributionsInput, ProfileUncheckedCreateWithoutContributionsInput>
+    connectOrCreate?: ProfileCreateOrConnectWithoutContributionsInput
+    upsert?: ProfileUpsertWithoutContributionsInput
+    disconnect?: ProfileWhereInput | boolean
+    delete?: ProfileWhereInput | boolean
+    connect?: ProfileWhereUniqueInput
+    update?: XOR<XOR<ProfileUpdateToOneWithWhereWithoutContributionsInput, ProfileUpdateWithoutContributionsInput>, ProfileUncheckedUpdateWithoutContributionsInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -11419,6 +11695,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     martyr?: MartyrCreateNestedOneWithoutContributionsInput
+    profile?: ProfileCreateNestedOneWithoutContributionsInput
   }
 
   export type ContributionUncheckedCreateWithoutUserInput = {
@@ -11430,6 +11707,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     martyrId?: string | null
+    profileId?: string | null
   }
 
   export type ContributionCreateOrConnectWithoutUserInput = {
@@ -11481,10 +11759,14 @@ export namespace Prisma {
     bio?: string | null
     avatar?: string | null
     location?: string | null
+    address?: string | null
+    phone?: string | null
     website?: string | null
     socialLinks?: NullableJsonNullValueInput | InputJsonValue
+    isVerified?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    contributions?: ContributionCreateNestedManyWithoutProfileInput
   }
 
   export type ProfileUncheckedCreateWithoutUserInput = {
@@ -11492,10 +11774,14 @@ export namespace Prisma {
     bio?: string | null
     avatar?: string | null
     location?: string | null
+    address?: string | null
+    phone?: string | null
     website?: string | null
     socialLinks?: NullableJsonNullValueInput | InputJsonValue
+    isVerified?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    contributions?: ContributionUncheckedCreateNestedManyWithoutProfileInput
   }
 
   export type ProfileCreateOrConnectWithoutUserInput = {
@@ -11532,6 +11818,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Contribution"> | Date | string
     userId?: StringFilter<"Contribution"> | string
     martyrId?: StringNullableFilter<"Contribution"> | string | null
+    profileId?: StringNullableFilter<"Contribution"> | string | null
   }
 
   export type TestimonialUpsertWithWhereUniqueWithoutUserInput = {
@@ -11582,10 +11869,14 @@ export namespace Prisma {
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
     socialLinks?: NullableJsonNullValueInput | InputJsonValue
+    isVerified?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    contributions?: ContributionUpdateManyWithoutProfileNestedInput
   }
 
   export type ProfileUncheckedUpdateWithoutUserInput = {
@@ -11593,10 +11884,14 @@ export namespace Prisma {
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
     socialLinks?: NullableJsonNullValueInput | InputJsonValue
+    isVerified?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    contributions?: ContributionUncheckedUpdateManyWithoutProfileNestedInput
   }
 
   export type UserCreateWithoutProfileInput = {
@@ -11642,6 +11937,40 @@ export namespace Prisma {
   export type UserCreateOrConnectWithoutProfileInput = {
     where: UserWhereUniqueInput
     create: XOR<UserCreateWithoutProfileInput, UserUncheckedCreateWithoutProfileInput>
+  }
+
+  export type ContributionCreateWithoutProfileInput = {
+    id?: string
+    type: $Enums.ContributionType
+    status?: $Enums.ContributionStatus
+    content: JsonNullValueInput | InputJsonValue
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutContributionsInput
+    martyr?: MartyrCreateNestedOneWithoutContributionsInput
+  }
+
+  export type ContributionUncheckedCreateWithoutProfileInput = {
+    id?: string
+    type: $Enums.ContributionType
+    status?: $Enums.ContributionStatus
+    content: JsonNullValueInput | InputJsonValue
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    userId: string
+    martyrId?: string | null
+  }
+
+  export type ContributionCreateOrConnectWithoutProfileInput = {
+    where: ContributionWhereUniqueInput
+    create: XOR<ContributionCreateWithoutProfileInput, ContributionUncheckedCreateWithoutProfileInput>
+  }
+
+  export type ContributionCreateManyProfileInputEnvelope = {
+    data: ContributionCreateManyProfileInput | ContributionCreateManyProfileInput[]
+    skipDuplicates?: boolean
   }
 
   export type UserUpsertWithoutProfileInput = {
@@ -11693,6 +12022,22 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     contributions?: ContributionUncheckedUpdateManyWithoutUserNestedInput
     testimonials?: TestimonialUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type ContributionUpsertWithWhereUniqueWithoutProfileInput = {
+    where: ContributionWhereUniqueInput
+    update: XOR<ContributionUpdateWithoutProfileInput, ContributionUncheckedUpdateWithoutProfileInput>
+    create: XOR<ContributionCreateWithoutProfileInput, ContributionUncheckedCreateWithoutProfileInput>
+  }
+
+  export type ContributionUpdateWithWhereUniqueWithoutProfileInput = {
+    where: ContributionWhereUniqueInput
+    data: XOR<ContributionUpdateWithoutProfileInput, ContributionUncheckedUpdateWithoutProfileInput>
+  }
+
+  export type ContributionUpdateManyWithWhereWithoutProfileInput = {
+    where: ContributionScalarWhereInput
+    data: XOR<ContributionUpdateManyMutationInput, ContributionUncheckedUpdateManyWithoutProfileInput>
   }
 
   export type TestimonialCreateWithoutMartyrInput = {
@@ -11768,6 +12113,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutContributionsInput
+    profile?: ProfileCreateNestedOneWithoutContributionsInput
   }
 
   export type ContributionUncheckedCreateWithoutMartyrInput = {
@@ -11779,6 +12125,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     userId: string
+    profileId?: string | null
   }
 
   export type ContributionCreateOrConnectWithoutMartyrInput = {
@@ -12221,6 +12568,41 @@ export namespace Prisma {
     create: XOR<MartyrCreateWithoutContributionsInput, MartyrUncheckedCreateWithoutContributionsInput>
   }
 
+  export type ProfileCreateWithoutContributionsInput = {
+    id?: string
+    bio?: string | null
+    avatar?: string | null
+    location?: string | null
+    address?: string | null
+    phone?: string | null
+    website?: string | null
+    socialLinks?: NullableJsonNullValueInput | InputJsonValue
+    isVerified?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutProfileInput
+  }
+
+  export type ProfileUncheckedCreateWithoutContributionsInput = {
+    id?: string
+    userId: string
+    bio?: string | null
+    avatar?: string | null
+    location?: string | null
+    address?: string | null
+    phone?: string | null
+    website?: string | null
+    socialLinks?: NullableJsonNullValueInput | InputJsonValue
+    isVerified?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ProfileCreateOrConnectWithoutContributionsInput = {
+    where: ProfileWhereUniqueInput
+    create: XOR<ProfileCreateWithoutContributionsInput, ProfileUncheckedCreateWithoutContributionsInput>
+  }
+
   export type UserUpsertWithoutContributionsInput = {
     update: XOR<UserUpdateWithoutContributionsInput, UserUncheckedUpdateWithoutContributionsInput>
     create: XOR<UserCreateWithoutContributionsInput, UserUncheckedCreateWithoutContributionsInput>
@@ -12321,6 +12703,47 @@ export namespace Prisma {
     sources?: SourceUncheckedUpdateManyWithoutMartyrNestedInput
   }
 
+  export type ProfileUpsertWithoutContributionsInput = {
+    update: XOR<ProfileUpdateWithoutContributionsInput, ProfileUncheckedUpdateWithoutContributionsInput>
+    create: XOR<ProfileCreateWithoutContributionsInput, ProfileUncheckedCreateWithoutContributionsInput>
+    where?: ProfileWhereInput
+  }
+
+  export type ProfileUpdateToOneWithWhereWithoutContributionsInput = {
+    where?: ProfileWhereInput
+    data: XOR<ProfileUpdateWithoutContributionsInput, ProfileUncheckedUpdateWithoutContributionsInput>
+  }
+
+  export type ProfileUpdateWithoutContributionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    website?: NullableStringFieldUpdateOperationsInput | string | null
+    socialLinks?: NullableJsonNullValueInput | InputJsonValue
+    isVerified?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutProfileNestedInput
+  }
+
+  export type ProfileUncheckedUpdateWithoutContributionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    website?: NullableStringFieldUpdateOperationsInput | string | null
+    socialLinks?: NullableJsonNullValueInput | InputJsonValue
+    isVerified?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type ContributionCreateManyUserInput = {
     id?: string
     type: $Enums.ContributionType
@@ -12330,6 +12753,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     martyrId?: string | null
+    profileId?: string | null
   }
 
   export type TestimonialCreateManyUserInput = {
@@ -12353,6 +12777,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     martyr?: MartyrUpdateOneWithoutContributionsNestedInput
+    profile?: ProfileUpdateOneWithoutContributionsNestedInput
   }
 
   export type ContributionUncheckedUpdateWithoutUserInput = {
@@ -12364,6 +12789,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     martyrId?: NullableStringFieldUpdateOperationsInput | string | null
+    profileId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ContributionUncheckedUpdateManyWithoutUserInput = {
@@ -12375,6 +12801,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     martyrId?: NullableStringFieldUpdateOperationsInput | string | null
+    profileId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type TestimonialUpdateWithoutUserInput = {
@@ -12413,6 +12840,54 @@ export namespace Prisma {
     martyrId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
+  export type ContributionCreateManyProfileInput = {
+    id?: string
+    type: $Enums.ContributionType
+    status?: $Enums.ContributionStatus
+    content: JsonNullValueInput | InputJsonValue
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    userId: string
+    martyrId?: string | null
+  }
+
+  export type ContributionUpdateWithoutProfileInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: EnumContributionTypeFieldUpdateOperationsInput | $Enums.ContributionType
+    status?: EnumContributionStatusFieldUpdateOperationsInput | $Enums.ContributionStatus
+    content?: JsonNullValueInput | InputJsonValue
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutContributionsNestedInput
+    martyr?: MartyrUpdateOneWithoutContributionsNestedInput
+  }
+
+  export type ContributionUncheckedUpdateWithoutProfileInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: EnumContributionTypeFieldUpdateOperationsInput | $Enums.ContributionType
+    status?: EnumContributionStatusFieldUpdateOperationsInput | $Enums.ContributionStatus
+    content?: JsonNullValueInput | InputJsonValue
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userId?: StringFieldUpdateOperationsInput | string
+    martyrId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type ContributionUncheckedUpdateManyWithoutProfileInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: EnumContributionTypeFieldUpdateOperationsInput | $Enums.ContributionType
+    status?: EnumContributionStatusFieldUpdateOperationsInput | $Enums.ContributionStatus
+    content?: JsonNullValueInput | InputJsonValue
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userId?: StringFieldUpdateOperationsInput | string
+    martyrId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
   export type TestimonialCreateManyMartyrInput = {
     id?: string
     content: string
@@ -12444,6 +12919,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     userId: string
+    profileId?: string | null
   }
 
   export type TestimonialUpdateWithoutMartyrInput = {
@@ -12521,6 +12997,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutContributionsNestedInput
+    profile?: ProfileUpdateOneWithoutContributionsNestedInput
   }
 
   export type ContributionUncheckedUpdateWithoutMartyrInput = {
@@ -12532,6 +13009,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     userId?: StringFieldUpdateOperationsInput | string
+    profileId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ContributionUncheckedUpdateManyWithoutMartyrInput = {
@@ -12543,6 +13021,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     userId?: StringFieldUpdateOperationsInput | string
+    profileId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
 

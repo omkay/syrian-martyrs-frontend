@@ -67,6 +67,7 @@ export async function createContribution(data: {
   type: string
   userId: string
   martyrId?: string
+  profileId?: string
   content: any
   notes?: string
 }) {
@@ -75,6 +76,7 @@ export async function createContribution(data: {
       type: data.type as any,
       userId: data.userId,
       martyrId: data.martyrId,
+      profileId: data.profileId,
       content: data.content,
       notes: data.notes
     }
@@ -90,9 +92,45 @@ export async function getPendingContributions() {
       },
       martyr: {
         select: { id: true, name: true }
+      },
+      profile: {
+        select: { id: true, userId: true }
       }
     },
     orderBy: { createdAt: 'asc' }
+  })
+}
+
+export async function getContributionsByUser(userId: string) {
+  return await prisma.contribution.findMany({
+    where: { userId },
+    include: {
+      martyr: {
+        select: { id: true, name: true }
+      },
+      profile: {
+        select: { id: true, userId: true }
+      }
+    },
+    orderBy: { createdAt: 'desc' }
+  })
+}
+
+export async function getContributionsByType(type: string) {
+  return await prisma.contribution.findMany({
+    where: { type: type as any },
+    include: {
+      user: {
+        select: { id: true, name: true, email: true }
+      },
+      martyr: {
+        select: { id: true, name: true }
+      },
+      profile: {
+        select: { id: true, userId: true }
+      }
+    },
+    orderBy: { createdAt: 'desc' }
   })
 }
 
@@ -182,7 +220,19 @@ export async function createUser(data: {
       email: data.email,
       name: data.name,
       password: data.password,
-      role: data.role as any
+      role: data.role as any,
+      profile: {
+        create: {
+          bio: null,
+          avatar: null,
+          location: null,
+          address: null,
+          phone: null,
+          website: null,
+          socialLinks: null,
+          isVerified: false
+        }
+      }
     },
     include: { profile: true }
   })
@@ -192,6 +242,8 @@ export async function updateUserProfile(userId: string, data: {
   bio?: string
   avatar?: string
   location?: string
+  address?: string
+  phone?: string
   website?: string
   socialLinks?: any
 }) {
@@ -200,6 +252,14 @@ export async function updateUserProfile(userId: string, data: {
     update: data,
     create: {
       userId,
+      bio: null,
+      avatar: null,
+      location: null,
+      address: null,
+      phone: null,
+      website: null,
+      socialLinks: null,
+      isVerified: false,
       ...data
     }
   })
