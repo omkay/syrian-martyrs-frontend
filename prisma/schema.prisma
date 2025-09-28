@@ -45,6 +45,8 @@ model Profile {
   bio         String?
   avatar      String?
   location    String?
+  address     String?  // Full address
+  phone       String?  // Phone/mobile number
   website     String?
   socialLinks Json?    // Store social media links as JSON
   isVerified  Boolean  @default(false)

@@ -9,13 +9,9 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ProfileContributionForm } from "@/components/profile-contribution-form"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { 
-  User, 
   FileText, 
-  Image, 
-  Link, 
   Edit, 
   CheckCircle, 
   XCircle, 
@@ -57,9 +53,14 @@ export default function ContributionsPage() {
   const loadContributions = async () => {
     try {
       setIsLoading(true)
-      // This would be a client-side action in a real app
-      // For now, we'll simulate the data
-      setContributions([])
+      // Load only MARTYR_ADDITION and TESTIMONIAL_ADDITION contributions
+      const response = await fetch(`/api/contributions?userId=${user?.id}`)
+      if (response.ok) {
+        const data = await response.json()
+        setContributions(data)
+      } else {
+        setError("Failed to load contributions")
+      }
     } catch (err) {
       setError("Failed to load contributions")
     } finally {
@@ -99,16 +100,10 @@ export default function ContributionsPage() {
 
   const getContributionIcon = (type: string) => {
     switch (type) {
-      case "PROFILE_CREATION":
-      case "PROFILE_UPDATE":
-        return <User className="h-5 w-5" />
       case "TESTIMONIAL_ADDITION":
         return <FileText className="h-5 w-5" />
       case "MARTYR_ADDITION":
-      case "MARTYR_UPDATE":
         return <Edit className="h-5 w-5" />
-      case "SOURCE_ADDITION":
-        return <Link className="h-5 w-5" />
       default:
         return <FileText className="h-5 w-5" />
     }
@@ -116,22 +111,10 @@ export default function ContributionsPage() {
 
   const getContributionTitle = (type: string) => {
     switch (type) {
-      case "PROFILE_CREATION":
-        return "Profile Creation"
-      case "PROFILE_UPDATE":
-        return "Profile Update"
-      case "PROFILE_VERIFICATION":
-        return "Profile Verification Request"
       case "TESTIMONIAL_ADDITION":
         return "Testimonial"
       case "MARTYR_ADDITION":
-        return "Martyr Profile Addition"
-      case "MARTYR_UPDATE":
-        return "Martyr Profile Update"
-      case "SOURCE_ADDITION":
-        return "Source Addition"
-      case "CORRECTION":
-        return "Correction"
+        return "Created Martyr Profile"
       default:
         return "Contribution"
     }
@@ -175,9 +158,8 @@ export default function ContributionsPage() {
           </div>
 
           <Tabs defaultValue="all" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="profiles">Profiles</TabsTrigger>
               <TabsTrigger value="martyrs">Martyrs</TabsTrigger>
               <TabsTrigger value="testimonials">Testimonials</TabsTrigger>
             </TabsList>
@@ -185,7 +167,14 @@ export default function ContributionsPage() {
             <TabsContent value="all" className="space-y-6">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-semibold">All Contributions</h2>
-                <ProfileContributionForm existingProfile={!!user.profile} />
+                <div className="space-x-2">
+                  <Button asChild>
+                    <a href="/add-martyr">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Martyr
+                    </a>
+                  </Button>
+                </div>
               </div>
 
               {isLoading ? (
@@ -204,12 +193,14 @@ export default function ContributionsPage() {
                     <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                     <h3 className="text-lg font-semibold mb-2">No contributions yet</h3>
                     <p className="text-muted-foreground mb-4">
-                      Start contributing to the Syrian Martyrs Memorial by creating your profile or adding information.
+                      Start contributing to the Syrian Martyrs Memorial by creating martyr profiles or adding testimonials.
                     </p>
                     <div className="space-y-2">
-                      <ProfileContributionForm existingProfile={!!user.profile} />
-                      <Button variant="outline" asChild>
+                      <Button asChild>
                         <a href="/add-martyr">Add Martyr Profile</a>
+                      </Button>
+                      <Button variant="outline" asChild>
+                        <a href="/search">Browse Martyrs to Add Testimonials</a>
                       </Button>
                     </div>
                   </CardContent>
@@ -253,27 +244,10 @@ export default function ContributionsPage() {
               )}
             </TabsContent>
 
-            <TabsContent value="profiles" className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold">Profile Contributions</h2>
-                <ProfileContributionForm existingProfile={!!user.profile} />
-              </div>
-              
-              <Card>
-                <CardContent className="text-center py-12">
-                  <User className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Profile Contributions</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Create or update your profile to share your story with the community.
-                  </p>
-                  <ProfileContributionForm existingProfile={!!user.profile} />
-                </CardContent>
-              </Card>
-            </TabsContent>
 
             <TabsContent value="martyrs" className="space-y-6">
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold">Martyr Contributions</h2>
+                <h2 className="text-xl font-semibold">Martyr Profiles</h2>
                 <Button asChild>
                   <a href="/add-martyr">
                     <Plus className="h-4 w-4 mr-2" />
@@ -282,37 +256,116 @@ export default function ContributionsPage() {
                 </Button>
               </div>
               
-              <Card>
-                <CardContent className="text-center py-12">
-                  <Edit className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Martyr Contributions</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Add new martyr profiles or update existing ones to help preserve their memory.
-                  </p>
-                  <Button asChild>
-                    <a href="/add-martyr">Add Martyr Profile</a>
-                  </Button>
-                </CardContent>
-              </Card>
+              {contributions.filter(c => c.type === 'MARTYR_ADDITION').length === 0 ? (
+                <Card>
+                  <CardContent className="text-center py-12">
+                    <Edit className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No Martyr Profiles</h3>
+                    <p className="text-muted-foreground mb-4">
+                      Create new martyr profiles to help preserve their memory and share their stories.
+                    </p>
+                    <Button asChild>
+                      <a href="/add-martyr">Add Martyr Profile</a>
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-4">
+                  {contributions.filter(c => c.type === 'MARTYR_ADDITION').map((contribution) => (
+                    <Card key={contribution.id}>
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            {getContributionIcon(contribution.type)}
+                            <CardTitle className="text-lg">
+                              {getContributionTitle(contribution.type)}
+                            </CardTitle>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            {getStatusIcon(contribution.status)}
+                            {getStatusBadge(contribution.status)}
+                          </div>
+                        </div>
+                        <CardDescription>
+                          Submitted on {new Date(contribution.createdAt).toLocaleDateString()}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          {contribution.martyr && (
+                            <p className="text-sm text-muted-foreground">
+                              Related to: <strong>{contribution.martyr.name}</strong>
+                            </p>
+                          )}
+                          {contribution.notes && (
+                            <p className="text-sm">{contribution.notes}</p>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="testimonials" className="space-y-6">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-semibold">Testimonial Contributions</h2>
+                <Button variant="outline" asChild>
+                  <a href="/search">Browse Martyrs</a>
+                </Button>
               </div>
               
-              <Card>
-                <CardContent className="text-center py-12">
-                  <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Testimonial Contributions</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Share personal stories and memories about martyrs to help preserve their legacy.
-                  </p>
-                  <Button variant="outline" asChild>
-                    <a href="/search">Browse Martyrs</a>
-                  </Button>
-                </CardContent>
-              </Card>
+              {contributions.filter(c => c.type === 'TESTIMONIAL_ADDITION').length === 0 ? (
+                <Card>
+                  <CardContent className="text-center py-12">
+                    <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No Testimonials Added</h3>
+                    <p className="text-muted-foreground mb-4">
+                      Share personal stories and memories about martyrs to help preserve their legacy.
+                    </p>
+                    <Button variant="outline" asChild>
+                      <a href="/search">Browse Martyrs to Add Testimonials</a>
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-4">
+                  {contributions.filter(c => c.type === 'TESTIMONIAL_ADDITION').map((contribution) => (
+                    <Card key={contribution.id}>
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            {getContributionIcon(contribution.type)}
+                            <CardTitle className="text-lg">
+                              {getContributionTitle(contribution.type)}
+                            </CardTitle>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            {getStatusIcon(contribution.status)}
+                            {getStatusBadge(contribution.status)}
+                          </div>
+                        </div>
+                        <CardDescription>
+                          Submitted on {new Date(contribution.createdAt).toLocaleDateString()}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          {contribution.martyr && (
+                            <p className="text-sm text-muted-foreground">
+                              Related to: <strong>{contribution.martyr.name}</strong>
+                            </p>
+                          )}
+                          {contribution.notes && (
+                            <p className="text-sm">{contribution.notes}</p>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </TabsContent>
           </Tabs>
         </div>

@@ -220,7 +220,19 @@ export async function createUser(data: {
       email: data.email,
       name: data.name,
       password: data.password,
-      role: data.role as any
+      role: data.role as any,
+      profile: {
+        create: {
+          bio: null,
+          avatar: null,
+          location: null,
+          address: null,
+          phone: null,
+          website: null,
+          socialLinks: null,
+          isVerified: false
+        }
+      }
     },
     include: { profile: true }
   })
@@ -230,6 +242,8 @@ export async function updateUserProfile(userId: string, data: {
   bio?: string
   avatar?: string
   location?: string
+  address?: string
+  phone?: string
   website?: string
   socialLinks?: any
 }) {
@@ -238,6 +252,14 @@ export async function updateUserProfile(userId: string, data: {
     update: data,
     create: {
       userId,
+      bio: null,
+      avatar: null,
+      location: null,
+      address: null,
+      phone: null,
+      website: null,
+      socialLinks: null,
+      isVerified: false,
       ...data
     }
   })

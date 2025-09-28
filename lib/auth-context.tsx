@@ -9,6 +9,17 @@ type User = {
   email: string
   role: "USER" | "ADMIN" | "MODERATOR"
   isVerified: boolean
+  profile?: {
+    id: string
+    bio: string | null
+    avatar: string | null
+    location: string | null
+    address: string | null
+    phone: string | null
+    website: string | null
+    socialLinks: any
+    isVerified: boolean
+  } | null
 }
 
 interface AuthContextType {

@@ -2813,6 +2813,8 @@ export namespace Prisma {
     bio: string | null
     avatar: string | null
     location: string | null
+    address: string | null
+    phone: string | null
     website: string | null
     isVerified: boolean | null
     createdAt: Date | null
@@ -2825,6 +2827,8 @@ export namespace Prisma {
     bio: string | null
     avatar: string | null
     location: string | null
+    address: string | null
+    phone: string | null
     website: string | null
     isVerified: boolean | null
     createdAt: Date | null
@@ -2837,6 +2841,8 @@ export namespace Prisma {
     bio: number
     avatar: number
     location: number
+    address: number
+    phone: number
     website: number
     socialLinks: number
     isVerified: number
@@ -2852,6 +2858,8 @@ export namespace Prisma {
     bio?: true
     avatar?: true
     location?: true
+    address?: true
+    phone?: true
     website?: true
     isVerified?: true
     createdAt?: true
@@ -2864,6 +2872,8 @@ export namespace Prisma {
     bio?: true
     avatar?: true
     location?: true
+    address?: true
+    phone?: true
     website?: true
     isVerified?: true
     createdAt?: true
@@ -2876,6 +2886,8 @@ export namespace Prisma {
     bio?: true
     avatar?: true
     location?: true
+    address?: true
+    phone?: true
     website?: true
     socialLinks?: true
     isVerified?: true
@@ -2962,6 +2974,8 @@ export namespace Prisma {
     bio: string | null
     avatar: string | null
     location: string | null
+    address: string | null
+    phone: string | null
     website: string | null
     socialLinks: JsonValue | null
     isVerified: boolean
@@ -2992,6 +3006,8 @@ export namespace Prisma {
     bio?: boolean
     avatar?: boolean
     location?: boolean
+    address?: boolean
+    phone?: boolean
     website?: boolean
     socialLinks?: boolean
     isVerified?: boolean
@@ -3008,6 +3024,8 @@ export namespace Prisma {
     bio?: boolean
     avatar?: boolean
     location?: boolean
+    address?: boolean
+    phone?: boolean
     website?: boolean
     socialLinks?: boolean
     isVerified?: boolean
@@ -3022,6 +3040,8 @@ export namespace Prisma {
     bio?: boolean
     avatar?: boolean
     location?: boolean
+    address?: boolean
+    phone?: boolean
     website?: boolean
     socialLinks?: boolean
     isVerified?: boolean
@@ -3036,6 +3056,8 @@ export namespace Prisma {
     bio?: boolean
     avatar?: boolean
     location?: boolean
+    address?: boolean
+    phone?: boolean
     website?: boolean
     socialLinks?: boolean
     isVerified?: boolean
@@ -3043,7 +3065,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type ProfileOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "bio" | "avatar" | "location" | "website" | "socialLinks" | "isVerified" | "createdAt" | "updatedAt", ExtArgs["result"]["profile"]>
+  export type ProfileOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "bio" | "avatar" | "location" | "address" | "phone" | "website" | "socialLinks" | "isVerified" | "createdAt" | "updatedAt", ExtArgs["result"]["profile"]>
   export type ProfileInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     contributions?: boolean | Profile$contributionsArgs<ExtArgs>
@@ -3068,6 +3090,8 @@ export namespace Prisma {
       bio: string | null
       avatar: string | null
       location: string | null
+      address: string | null
+      phone: string | null
       website: string | null
       socialLinks: Prisma.JsonValue | null
       isVerified: boolean
@@ -3503,6 +3527,8 @@ export namespace Prisma {
     readonly bio: FieldRef<"Profile", 'String'>
     readonly avatar: FieldRef<"Profile", 'String'>
     readonly location: FieldRef<"Profile", 'String'>
+    readonly address: FieldRef<"Profile", 'String'>
+    readonly phone: FieldRef<"Profile", 'String'>
     readonly website: FieldRef<"Profile", 'String'>
     readonly socialLinks: FieldRef<"Profile", 'Json'>
     readonly isVerified: FieldRef<"Profile", 'Boolean'>
@@ -8722,6 +8748,8 @@ export namespace Prisma {
     bio: 'bio',
     avatar: 'avatar',
     location: 'location',
+    address: 'address',
+    phone: 'phone',
     website: 'website',
     socialLinks: 'socialLinks',
     isVerified: 'isVerified',
@@ -9123,6 +9151,8 @@ export namespace Prisma {
     bio?: StringNullableFilter<"Profile"> | string | null
     avatar?: StringNullableFilter<"Profile"> | string | null
     location?: StringNullableFilter<"Profile"> | string | null
+    address?: StringNullableFilter<"Profile"> | string | null
+    phone?: StringNullableFilter<"Profile"> | string | null
     website?: StringNullableFilter<"Profile"> | string | null
     socialLinks?: JsonNullableFilter<"Profile">
     isVerified?: BoolFilter<"Profile"> | boolean
@@ -9138,6 +9168,8 @@ export namespace Prisma {
     bio?: SortOrderInput | SortOrder
     avatar?: SortOrderInput | SortOrder
     location?: SortOrderInput | SortOrder
+    address?: SortOrderInput | SortOrder
+    phone?: SortOrderInput | SortOrder
     website?: SortOrderInput | SortOrder
     socialLinks?: SortOrderInput | SortOrder
     isVerified?: SortOrder
@@ -9156,6 +9188,8 @@ export namespace Prisma {
     bio?: StringNullableFilter<"Profile"> | string | null
     avatar?: StringNullableFilter<"Profile"> | string | null
     location?: StringNullableFilter<"Profile"> | string | null
+    address?: StringNullableFilter<"Profile"> | string | null
+    phone?: StringNullableFilter<"Profile"> | string | null
     website?: StringNullableFilter<"Profile"> | string | null
     socialLinks?: JsonNullableFilter<"Profile">
     isVerified?: BoolFilter<"Profile"> | boolean
@@ -9171,6 +9205,8 @@ export namespace Prisma {
     bio?: SortOrderInput | SortOrder
     avatar?: SortOrderInput | SortOrder
     location?: SortOrderInput | SortOrder
+    address?: SortOrderInput | SortOrder
+    phone?: SortOrderInput | SortOrder
     website?: SortOrderInput | SortOrder
     socialLinks?: SortOrderInput | SortOrder
     isVerified?: SortOrder
@@ -9190,6 +9226,8 @@ export namespace Prisma {
     bio?: StringNullableWithAggregatesFilter<"Profile"> | string | null
     avatar?: StringNullableWithAggregatesFilter<"Profile"> | string | null
     location?: StringNullableWithAggregatesFilter<"Profile"> | string | null
+    address?: StringNullableWithAggregatesFilter<"Profile"> | string | null
+    phone?: StringNullableWithAggregatesFilter<"Profile"> | string | null
     website?: StringNullableWithAggregatesFilter<"Profile"> | string | null
     socialLinks?: JsonNullableWithAggregatesFilter<"Profile">
     isVerified?: BoolWithAggregatesFilter<"Profile"> | boolean
@@ -9687,6 +9725,8 @@ export namespace Prisma {
     bio?: string | null
     avatar?: string | null
     location?: string | null
+    address?: string | null
+    phone?: string | null
     website?: string | null
     socialLinks?: NullableJsonNullValueInput | InputJsonValue
     isVerified?: boolean
@@ -9702,6 +9742,8 @@ export namespace Prisma {
     bio?: string | null
     avatar?: string | null
     location?: string | null
+    address?: string | null
+    phone?: string | null
     website?: string | null
     socialLinks?: NullableJsonNullValueInput | InputJsonValue
     isVerified?: boolean
@@ -9715,6 +9757,8 @@ export namespace Prisma {
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
     socialLinks?: NullableJsonNullValueInput | InputJsonValue
     isVerified?: BoolFieldUpdateOperationsInput | boolean
@@ -9730,6 +9774,8 @@ export namespace Prisma {
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
     socialLinks?: NullableJsonNullValueInput | InputJsonValue
     isVerified?: BoolFieldUpdateOperationsInput | boolean
@@ -9744,6 +9790,8 @@ export namespace Prisma {
     bio?: string | null
     avatar?: string | null
     location?: string | null
+    address?: string | null
+    phone?: string | null
     website?: string | null
     socialLinks?: NullableJsonNullValueInput | InputJsonValue
     isVerified?: boolean
@@ -9756,6 +9804,8 @@ export namespace Prisma {
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
     socialLinks?: NullableJsonNullValueInput | InputJsonValue
     isVerified?: BoolFieldUpdateOperationsInput | boolean
@@ -9769,6 +9819,8 @@ export namespace Prisma {
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
     socialLinks?: NullableJsonNullValueInput | InputJsonValue
     isVerified?: BoolFieldUpdateOperationsInput | boolean
@@ -10459,6 +10511,8 @@ export namespace Prisma {
     bio?: SortOrder
     avatar?: SortOrder
     location?: SortOrder
+    address?: SortOrder
+    phone?: SortOrder
     website?: SortOrder
     socialLinks?: SortOrder
     isVerified?: SortOrder
@@ -10472,6 +10526,8 @@ export namespace Prisma {
     bio?: SortOrder
     avatar?: SortOrder
     location?: SortOrder
+    address?: SortOrder
+    phone?: SortOrder
     website?: SortOrder
     isVerified?: SortOrder
     createdAt?: SortOrder
@@ -10484,6 +10540,8 @@ export namespace Prisma {
     bio?: SortOrder
     avatar?: SortOrder
     location?: SortOrder
+    address?: SortOrder
+    phone?: SortOrder
     website?: SortOrder
     isVerified?: SortOrder
     createdAt?: SortOrder
@@ -11701,6 +11759,8 @@ export namespace Prisma {
     bio?: string | null
     avatar?: string | null
     location?: string | null
+    address?: string | null
+    phone?: string | null
     website?: string | null
     socialLinks?: NullableJsonNullValueInput | InputJsonValue
     isVerified?: boolean
@@ -11714,6 +11774,8 @@ export namespace Prisma {
     bio?: string | null
     avatar?: string | null
     location?: string | null
+    address?: string | null
+    phone?: string | null
     website?: string | null
     socialLinks?: NullableJsonNullValueInput | InputJsonValue
     isVerified?: boolean
@@ -11807,6 +11869,8 @@ export namespace Prisma {
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
     socialLinks?: NullableJsonNullValueInput | InputJsonValue
     isVerified?: BoolFieldUpdateOperationsInput | boolean
@@ -11820,6 +11884,8 @@ export namespace Prisma {
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
     socialLinks?: NullableJsonNullValueInput | InputJsonValue
     isVerified?: BoolFieldUpdateOperationsInput | boolean
@@ -12507,6 +12573,8 @@ export namespace Prisma {
     bio?: string | null
     avatar?: string | null
     location?: string | null
+    address?: string | null
+    phone?: string | null
     website?: string | null
     socialLinks?: NullableJsonNullValueInput | InputJsonValue
     isVerified?: boolean
@@ -12521,6 +12589,8 @@ export namespace Prisma {
     bio?: string | null
     avatar?: string | null
     location?: string | null
+    address?: string | null
+    phone?: string | null
     website?: string | null
     socialLinks?: NullableJsonNullValueInput | InputJsonValue
     isVerified?: boolean
@@ -12649,6 +12719,8 @@ export namespace Prisma {
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
     socialLinks?: NullableJsonNullValueInput | InputJsonValue
     isVerified?: BoolFieldUpdateOperationsInput | boolean
@@ -12663,6 +12735,8 @@ export namespace Prisma {
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
     socialLinks?: NullableJsonNullValueInput | InputJsonValue
     isVerified?: BoolFieldUpdateOperationsInput | boolean

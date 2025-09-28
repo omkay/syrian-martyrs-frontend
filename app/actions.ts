@@ -119,7 +119,7 @@ export async function submitContribution(formData: FormData) {
   }
 }
 
-export async function addMartyr(formData: FormData) {
+export async function addMartyr(formData: FormData, userId?: string) {
   try {
     // Extract form data
     const name = formData.get("name") as string
@@ -178,13 +178,15 @@ export async function addMartyr(formData: FormData) {
       return { success: false, message: "Please enter a valid date" }
     }
 
-    // Get the admin user ID for submissions
-    // In a real app, this would come from the authenticated user
-    const adminUser = await getUserByEmail('admin@syrianmartyrs.com')
-    if (!adminUser) {
-      return { success: false, message: "System error: Admin user not found" }
+    // Use provided userId or fallback to admin user
+    let finalUserId = userId
+    if (!finalUserId) {
+      const adminUser = await getUserByEmail('admin@syrianmartyrs.com')
+      if (!adminUser) {
+        return { success: false, message: "System error: No user ID provided and admin user not found" }
+      }
+      finalUserId = adminUser.id
     }
-    const userId = adminUser.id
 
     // Create the martyr in the database
     const martyr = await createMartyr({
@@ -204,7 +206,7 @@ export async function addMartyr(formData: FormData) {
     // Create a contribution record for tracking
     await createContribution({
       type: "MARTYR_ADDITION",
-      userId,
+      userId: finalUserId,
       martyrId: martyr.id,
       content: {
         martyrData: {
@@ -423,6 +425,53 @@ export async function verifyEmail(token: string) {
     return {
       success: false,
       message: "An error occurred while verifying your email. Please try again.",
+    }
+  }
+}
+
+// Update user profile action
+export async function updateProfile(formData: FormData, userId: string) {
+  try {
+    // Extract form data
+    const bio = formData.get("bio") as string
+    const avatar = formData.get("avatar") as string
+    const location = formData.get("location") as string
+    const address = formData.get("address") as string
+    const phone = formData.get("phone") as string
+    const website = formData.get("website") as string
+    const socialLinks = formData.get("socialLinks") as string
+
+    // Parse social links if provided
+    let parsedSocialLinks = null
+    if (socialLinks && socialLinks.trim()) {
+      try {
+        parsedSocialLinks = JSON.parse(socialLinks)
+      } catch {
+        // If JSON parsing fails, treat as a simple string
+        parsedSocialLinks = socialLinks.split('\n').filter(link => link.trim())
+      }
+    }
+
+    // Update the profile
+    await updateUserProfile(userId, {
+      bio: bio || undefined,
+      avatar: avatar || undefined,
+      location: location || undefined,
+      address: address || undefined,
+      phone: phone || undefined,
+      website: website || undefined,
+      socialLinks: parsedSocialLinks
+    })
+
+    return {
+      success: true,
+      message: "Profile updated successfully!"
+    }
+  } catch (error) {
+    console.error("Error updating profile:", error)
+    return {
+      success: false,
+      message: "An error occurred while updating your profile. Please try again.",
     }
   }
 }

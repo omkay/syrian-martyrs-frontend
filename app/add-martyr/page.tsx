@@ -57,7 +57,7 @@ export default function AddMartyrPage() {
     const formData = new FormData(form)
 
     try {
-      const result = await addMartyr(formData)
+      const result = await addMartyr(formData, user.id)
       setFormState(result)
 
       if (result.success) {
