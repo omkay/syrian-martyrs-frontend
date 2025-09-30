@@ -1,266 +1,236 @@
 # Syrian Martyrs Memorial
 
-A memorial application built with Next.js to honor and remember those who lost their lives in the Syrian conflict. The application provides a searchable database of martyr profiles with detailed information, testimonials, and sources.
+A platform to honor and remember Syrian martyrs, built with a microservices architecture.
 
-## Features
+## 🏗️ Architecture
 
-- **Memorial Database**: Comprehensive profiles of Syrian martyrs with detailed information
-- **Search Functionality**: Text-based search by name or location
-- **Image Search**: Planned facial recognition search capability
-- **Authentication**: User authentication system (currently mock implementation)
-- **Responsive Design**: Mobile-first design with dark/light theme support
-- **Modern UI**: Built with Tailwind CSS and shadcn/ui components
+This project is structured as a microservices application with two main services:
 
-## Tech Stack
+- **Web Service** (`/web`): Next.js frontend application
+- **API Service** (`/api`): Express.js backend API
+- **Shared** (`/shared`): Common types and utilities
 
-- **Framework**: Next.js 15.2.4 with React 19
-- **Styling**: Tailwind CSS with custom theme
-- **UI Components**: shadcn/ui with Radix UI primitives
-- **Package Manager**: pnpm
-- **TypeScript**: Full TypeScript support
-- **Containerization**: Docker & Docker Compose
-
-## Prerequisites
-
-- Docker and Docker Compose installed on your system
-- Git (for cloning the repository)
-
-## Quick Start with Docker
-
-### 1. Clone the Repository
-
-```bash
-git clone <repository-url>
-cd syrian-martyrs-frontend
-```
-
-### 2. Environment Setup
-
-```bash
-# Copy the environment example file
-cp .env.example .env
-
-# Edit the .env file with your configuration (optional for basic setup)
-nano .env
-```
-
-### 3. Development with Docker
-
-#### Option A: Development with Hot Reload (Recommended)
-
-```bash
-# Start development server with hot reload
-pnpm docker:dev
-
-# Or using docker-compose directly
-docker-compose --profile dev up --build
-```
-
-#### Option B: Fresh Development Environment
-
-```bash
-# Start with fresh dependencies installation
-pnpm docker:dev:fresh
-
-# Or using docker-compose directly
-docker-compose --profile dev-fresh up --build
-```
-
-#### Option C: Production Build
-
-```bash
-# Start production build
-pnpm docker:prod
-
-# Or using docker-compose directly
-docker-compose --profile prod up --build
-```
-
-### 4. Access the Application
-
-- **Development**: http://localhost:3000
-- **Production**: http://localhost:3000
-
-## Available Docker Commands
-
-```bash
-# Development commands
-pnpm docker:dev          # Start development server with hot reload
-pnpm docker:dev:fresh    # Start with fresh dependency installation
-pnpm docker:prod         # Start production build
-
-# Management commands
-pnpm docker:down         # Stop all containers
-pnpm docker:clean        # Stop containers and remove images/volumes
-pnpm docker:logs         # View container logs
-```
-
-## Development Without Docker
-
-If you prefer to run the application without Docker:
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- Node.js 18+ 
-- pnpm (recommended) or npm
-
-### Setup
-
-```bash
-# Install dependencies
-pnpm install
-
-# Start development server
-pnpm dev
-
-# Build for production
-pnpm build
-
-# Start production server
-pnpm start
-```
-
-## Project Structure
-
-```
-syrian-martyrs-frontend/
-├── app/                    # Next.js app directory
-│   ├── layout.tsx         # Root layout component
-│   ├── page.tsx           # Home page
-│   └── globals.css        # Global styles
-├── components/            # React components
-│   ├── ui/               # shadcn/ui components
-│   ├── header.tsx        # Header component
-│   ├── hero.tsx          # Hero section
-│   ├── martyrs-list.tsx  # Martyrs list component
-│   └── ...
-├── lib/                  # Utility libraries
-│   ├── data.ts          # Mock data
-│   ├── types.ts         # TypeScript types
-│   └── auth-context.tsx # Authentication context
-├── hooks/               # Custom React hooks
-├── styles/              # Additional styles
-├── public/              # Static assets
-├── Dockerfile           # Production Docker image
-├── Dockerfile.dev       # Development Docker image
-├── docker-compose.yml   # Docker Compose configuration
-└── package.json         # Dependencies and scripts
-```
-
-## Authentication
-
-The application includes a mock authentication system with the following test credentials:
-
-- **Admin User**: 
-  - Email: `admin@example.com`
-  - Password: `password`
-  - Role: Admin
-
-- **Regular User**:
-  - Email: `user@example.com` 
-  - Password: `password`
-  - Role: User
-
-## Environment Variables
-
-Copy `.env.example` to `.env` and configure the following variables:
-
-```bash
-# Application Configuration
-NODE_ENV=development
-NEXT_TELEMETRY_DISABLED=1
-
-# Database Configuration (for future backend integration)
-# DATABASE_URL=postgresql://username:password@localhost:5432/syrian_martyrs
-
-# Authentication (for future backend integration)
-# NEXTAUTH_SECRET=your-secret-key-here
-# NEXTAUTH_URL=http://localhost:3000
-
-# API Configuration (for future backend integration)
-# API_BASE_URL=http://localhost:8000
-# API_KEY=your-api-key-here
-```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/your-feature-name`
-3. Make your changes
-4. Test your changes: `pnpm docker:dev`
-5. Commit your changes: `git commit -m 'Add some feature'`
-6. Push to the branch: `git push origin feature/your-feature-name`
-7. Submit a pull request
-
-## Docker Configuration Details
+- Node.js 18+
+- Docker & Docker Compose
+- PostgreSQL (or use Docker)
 
 ### Development Setup
 
-- **Base Image**: Node.js 18 Alpine
-- **Package Manager**: pnpm
-- **Hot Reload**: Enabled with volume mounting
-- **Port**: 3000
+1. **Clone and install dependencies:**
+   ```bash
+   git clone <repository-url>
+   cd syrian-martyrs-memorial
+   npm run install:all
+   ```
+
+2. **Start development services:**
+   ```bash
+   # Using Docker (recommended)
+   npm run docker:dev
+   
+   # Or run services separately
+   npm run dev
+   ```
+
+3. **Access the applications:**
+   - Web Frontend: http://localhost:3000
+   - API Backend: http://localhost:3001
+   - Database: localhost:5432
 
 ### Production Setup
 
-- **Multi-stage Build**: Optimized for production
-- **Standalone Output**: Next.js standalone mode for smaller images
-- **Security**: Non-root user execution
-- **Performance**: Optimized layer caching
+```bash
+# Build and start production services
+npm run docker:prod
+```
 
-### Docker Compose Profiles
+## 📁 Project Structure
 
-- `dev`: Development with hot reload
-- `dev-fresh`: Development with fresh dependency installation
-- `prod`: Production build
+```
+syrian-martyrs-memorial/
+├── web/                    # Frontend Next.js App
+│   ├── app/               # Next.js app directory
+│   ├── components/        # React components
+│   ├── lib/              # Frontend utilities
+│   ├── public/           # Static assets
+│   ├── styles/           # CSS files
+│   ├── package.json      # Frontend dependencies
+│   └── Dockerfile        # Frontend container
+│
+├── api/                  # Backend API Service
+│   ├── src/
+│   │   ├── routes/       # API route handlers
+│   │   ├── controllers/  # Business logic
+│   │   ├── services/    # Service layer
+│   │   ├── middleware/  # Auth, validation, etc.
+│   │   └── utils/       # Backend utilities
+│   ├── prisma/          # Database schema & migrations
+│   ├── lib/             # Shared backend utilities
+│   ├── package.json     # Backend dependencies
+│   └── Dockerfile       # Backend container
+│
+├── shared/              # Shared code between services
+│   ├── types/           # TypeScript types
+│   ├── utils/           # Shared utilities
+│   └── constants/       # Shared constants
+│
+├── docker-compose.yml     # Multi-service orchestration
+├── docker-compose.dev.yml # Development overrides
+└── package.json          # Root package management
+```
 
-## Troubleshooting
+## 🛠️ Development
 
-### Common Issues
+### Available Scripts
 
-1. **Port 3000 already in use**:
+#### Root Level
+- `npm run dev` - Start both web and API in development
+- `npm run build` - Build both services
+- `npm run docker:dev` - Start development with Docker
+- `npm run docker:prod` - Start production with Docker
+
+#### Web Service
+- `cd web && npm run dev` - Start web development server
+- `cd web && npm run build` - Build web application
+- `cd web && npm run start` - Start web production server
+
+#### API Service
+- `cd api && npm run dev` - Start API development server
+- `cd api && npm run build` - Build API application
+- `cd api && npm run start` - Start API production server
+
+### Database Management
+
+```bash
+# Generate Prisma client
+npm run db:generate
+
+# Run database migrations
+npm run db:migrate
+
+# Push schema changes
+npm run db:push
+
+# Seed database
+npm run db:seed
+
+# Open Prisma Studio
+npm run db:studio
+```
+
+## 🐳 Docker
+
+### Development
+```bash
+# Start all services with hot reload
+docker-compose -f docker-compose.dev.yml up --build
+
+# Start specific services
+docker-compose -f docker-compose.dev.yml up web-dev api-dev postgres redis
+```
+
+### Production
+```bash
+# Start production services
+docker-compose --profile production up --build
+
+# Stop all services
+docker-compose down
+
+# Clean up (remove volumes and images)
+docker-compose down -v --rmi all
+```
+
+## 🔧 Configuration
+
+### Environment Variables
+
+#### Web Service
+- `NEXT_PUBLIC_API_URL` - API service URL (default: http://localhost:3001)
+
+#### API Service
+- `DATABASE_URL` - PostgreSQL connection string
+- `REDIS_URL` - Redis connection string
+- `JWT_SECRET` - JWT signing secret
+- `FRONTEND_URL` - Frontend service URL for CORS
+
+### Database
+- PostgreSQL 15
+- Redis 7 (for caching and sessions)
+
+## 📡 API Endpoints
+
+### Health Check
+- `GET /api/health` - Service health status
+
+### Contributions
+- `GET /api/contributions` - Get user contributions
+- `POST /api/contributions` - Create new contribution
+
+### Admin
+- `GET /api/admin/stats` - Get admin statistics
+- `GET /api/admin/contributions` - Get all contributions
+- `GET /api/admin/users` - Get all users
+- `GET /api/admin/martyrs` - Get all martyrs
+
+## 🔐 Authentication
+
+The API uses JWT-based authentication. Include the token in the Authorization header:
+
+```
+Authorization: Bearer <jwt-token>
+```
+
+## 🧪 Testing
+
+```bash
+# Run API tests
+npm run test:api
+
+# Run all tests
+npm run test
+```
+
+## 📦 Deployment
+
+### Docker Deployment
+1. Build production images:
    ```bash
-   # Stop existing containers
-   pnpm docker:down
-   
-   # Or change the port in docker-compose.yml
+   docker-compose --profile production build
    ```
 
-2. **Permission issues on Linux/macOS**:
+2. Start production services:
    ```bash
-   # Fix file permissions
-   sudo chown -R $USER:$USER .
+   docker-compose --profile production up -d
    ```
 
-3. **Docker build fails**:
+### Manual Deployment
+1. Build both services:
    ```bash
-   # Clean Docker cache
-   docker system prune -a
-   
-   # Rebuild from scratch
-   pnpm docker:clean
-   pnpm docker:dev
+   npm run build
    ```
 
-4. **Hot reload not working**:
+2. Start services:
    ```bash
-   # Ensure volumes are properly mounted
-   docker-compose --profile dev up --build
+   npm run start
    ```
 
-### Getting Help
+## 🤝 Contributing
 
-- Check the logs: `pnpm docker:logs`
-- Verify Docker is running: `docker --version`
-- Check container status: `docker ps`
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests and linting
+5. Submit a pull request
 
-## License
+## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License.
 
-## Acknowledgments
+## 🆘 Support
 
-- Built with Next.js and React
-- UI components from shadcn/ui
-- Icons from Lucide React
-- Styling with Tailwind CSS
+For support and questions, please open an issue in the repository.
