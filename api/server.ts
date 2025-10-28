@@ -7,9 +7,11 @@ import { authMiddleware } from './src/middleware/auth'
 import { errorHandler } from './src/middleware/errorHandler'
 
 // Import routes
+import authRoutes from './src/routes/auth'
 import healthRoutes from './src/routes/health'
 import contributionRoutes from './src/routes/contributions'
 import adminRoutes from './src/routes/admin'
+import martyrsRoutes from './src/routes/martyrs'
 
 const app = express()
 const prisma = new PrismaClient()
@@ -30,9 +32,11 @@ app.get('/health', (req, res) => {
 })
 
 // Routes
+app.use('/api/auth', authRoutes)
 app.use('/api/health', healthRoutes)
 app.use('/api/contributions', contributionRoutes)
 app.use('/api/admin', adminRoutes)
+app.use('/api/martyrs', martyrsRoutes)
 
 // Error handling
 app.use(errorHandler)

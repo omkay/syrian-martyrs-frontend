@@ -65,15 +65,32 @@ export default function AdminMartyrsPage() {
       setIsLoading(true)
       setError(null)
       
-      const response = await fetch('/api/admin/martyr-additions')
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+      const token = user?.token || JSON.parse(localStorage.getItem('user') || '{}').token
+      
+      // Get all contributions and filter for MARTYR_ADDITION type
+      const response = await fetch(`${apiUrl}/api/admin/contributions?limit=50`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
       
       const data = await response.json()
-      console.log("Martyr additions data received:", data)
-      setMartyrAdditions(data.contributions || [])
-    } catch (err) {
+      console.log("Contributions data received:", data)
+      
+      // Filter for only MARTYR_ADDITION type contributions
+      const martyrAdditions = (data.contributions || []).filter(
+        (contrib: any) => contrib.type === 'MARTYR_ADDITION'
+      )
+      
+      console.log("Martyr additions filtered:", martyrAdditions)
+      setMartyrAdditions(martyrAdditions)
+    } catch (err: any) {
       console.error("Failed to load martyr additions:", err)
       setError(`Failed to load martyr additions: ${err.message}`)
     } finally {

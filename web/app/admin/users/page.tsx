@@ -42,10 +42,12 @@ interface User {
     location: string | null
     isVerified: boolean
   } | null
-  _count: {
-    contributions: number
-    testimonials: number
-  }
+  contributions?: Array<{
+    id: string
+    type: string
+    status: string
+    createdAt: string
+  }>
 }
 
 export default function AdminUsersPage() {
@@ -68,14 +70,23 @@ export default function AdminUsersPage() {
       setIsLoading(true)
       setError(null)
       
-      const response = await fetch('/api/admin/users')
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+      const token = user?.token || JSON.parse(localStorage.getItem('user') || '{}').token
+      
+      const response = await fetch(`${apiUrl}/api/admin/users?limit=50`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
       
       const data = await response.json()
       setUsers(data.users || [])
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to load users:", err)
       setError(`Failed to load users: ${err.message}`)
     } finally {
@@ -85,9 +96,13 @@ export default function AdminUsersPage() {
 
   const handleRoleChange = async (userId: string, newRole: string) => {
     try {
-      const response = await fetch(`/api/admin/users/${userId}`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+      const token = user?.token || JSON.parse(localStorage.getItem('user') || '{}').token
+      
+      const response = await fetch(`${apiUrl}/api/admin/users/${userId}`, {
         method: 'PUT',
         headers: {
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ role: newRole })
@@ -108,9 +123,13 @@ export default function AdminUsersPage() {
 
   const handleVerificationToggle = async (userId: string, isVerified: boolean) => {
     try {
-      const response = await fetch(`/api/admin/users/${userId}`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+      const token = user?.token || JSON.parse(localStorage.getItem('user') || '{}').token
+      
+      const response = await fetch(`${apiUrl}/api/admin/users/${userId}`, {
         method: 'PUT',
         headers: {
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ isVerified })
@@ -369,7 +388,7 @@ export default function AdminUsersPage() {
                             </div>
                             <div className="flex items-center">
                               <User className="h-3 w-3 mr-1" />
-                              {user._count.contributions} contributions
+                              {user.contributions?.length || 0} contributions
                             </div>
                           </div>
                         </div>

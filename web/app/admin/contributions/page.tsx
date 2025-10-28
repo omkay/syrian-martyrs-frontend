@@ -26,8 +26,12 @@ export default function AdminContributionsPage() {
       setIsLoading(true)
       setError(null)
       
-      const response = await fetch('/api/admin/contributions-simple', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+      const token = user?.token || JSON.parse(localStorage.getItem('user') || '{}').token
+      
+      const response = await fetch(`${apiUrl}/api/admin/contributions`, {
         headers: {
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       })
@@ -39,14 +43,17 @@ export default function AdminContributionsPage() {
       const data = await response.json()
       console.log("Contributions data received:", data)
       
+      // The API returns { contributions: [...], pagination: {...} }
+      const allContributions = data.contributions || []
+      
       // Filter out martyr additions - only show testimonials, corrections, etc.
-      const filteredContributions = (data.contributions || []).filter((contrib: any) => 
+      const filteredContributions = allContributions.filter((contrib: any) => 
         contrib.type !== 'MARTYR_ADDITION'
       )
       
       console.log("Filtered contributions (excluding martyr additions):", filteredContributions)
       setContributions(filteredContributions)
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to load contributions:", err)
       setError(`Failed to load contributions: ${err.message}`)
     } finally {

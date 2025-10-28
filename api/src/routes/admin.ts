@@ -1,9 +1,12 @@
 import { Router } from 'express'
 import { PrismaClient } from '../../lib/generated/prisma'
-import { adminMiddleware, requirePermission, AuthenticatedRequest } from '../middleware/auth'
+import { authMiddleware, adminMiddleware, requirePermission, AuthenticatedRequest } from '../middleware/auth'
 
 const router = Router()
 const prisma = new PrismaClient()
+
+// Apply authentication middleware to all admin routes
+router.use(authMiddleware)
 
 // GET /api/admin/contributions - Get all contributions for admin review
 router.get('/contributions', requirePermission('VIEW_ALL_CONTRIBUTIONS'), async (req: AuthenticatedRequest, res) => {
@@ -73,28 +76,81 @@ router.get('/contributions', requirePermission('VIEW_ALL_CONTRIBUTIONS'), async 
 })
 
 // GET /api/admin/stats - Get admin statistics
-router.get('/stats', requirePermission('VIEW_ADMIN_STATS'), async (req: AuthenticatedRequest, res) => {
+router.get('/stats', requirePermission('VIEW_ANALYTICS'), async (req: AuthenticatedRequest, res) => {
   try {
-    const stats = await Promise.all([
+    // Get all statistics in parallel
+    const [
+      totalMartyrs,
+      verifiedMartyrs,
+      totalContributions,
+      pendingContributions,
+      approvedContributions,
+      rejectedContributions,
+      totalUsers,
+      adminUsers,
+      moderatorUsers,
+      recentContributions,
+      recentMartyrs
+    ] = await Promise.all([
       prisma.martyr.count(),
-      prisma.user.count(),
-      prisma.testimonial.count(),
-      prisma.source.count(),
+      prisma.martyr.count({ where: { isVerified: true } }),
       prisma.contribution.count(),
       prisma.contribution.count({ where: { status: 'PENDING' } }),
       prisma.contribution.count({ where: { status: 'APPROVED' } }),
-      prisma.contribution.count({ where: { status: 'REJECTED' } })
+      prisma.contribution.count({ where: { status: 'REJECTED' } }),
+      prisma.user.count(),
+      prisma.user.count({ where: { role: 'ADMIN' } }),
+      prisma.user.count({ where: { role: 'MODERATOR' } }),
+      prisma.contribution.findMany({
+        take: 5,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          user: { select: { id: true, name: true, email: true } },
+          martyr: { select: { id: true, name: true } }
+        }
+      }),
+      prisma.martyr.findMany({
+        take: 5,
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          name: true,
+          isVerified: true,
+          createdAt: true
+        }
+      })
     ])
 
+    // Calculate rates
+    const unverifiedMartyrs = totalMartyrs - verifiedMartyrs
+    const verificationRate = totalMartyrs > 0 ? Math.round((verifiedMartyrs / totalMartyrs) * 100) : 0
+    const approvalRate = totalContributions > 0 ? Math.round((approvedContributions / totalContributions) * 100) : 0
+    const regularUsers = totalUsers - adminUsers - moderatorUsers
+
     res.json({
-      martyrs: stats[0],
-      users: stats[1],
-      testimonials: stats[2],
-      sources: stats[3],
-      contributions: stats[4],
-      pendingContributions: stats[5],
-      approvedContributions: stats[6],
-      rejectedContributions: stats[7]
+      martyrs: {
+        total: totalMartyrs,
+        verified: verifiedMartyrs,
+        unverified: unverifiedMartyrs,
+        verificationRate
+      },
+      contributions: {
+        total: totalContributions,
+        pending: pendingContributions,
+        approved: approvedContributions,
+        rejected: rejectedContributions,
+        approvalRate
+      },
+      users: {
+        total: totalUsers,
+        admins: adminUsers,
+        moderators: moderatorUsers,
+        regular: regularUsers
+      },
+      recentActivity: {
+        contributions: recentContributions,
+        martyrs: recentMartyrs
+      }
     })
   } catch (error) {
     console.error('Error fetching admin stats:', error)
@@ -103,7 +159,7 @@ router.get('/stats', requirePermission('VIEW_ADMIN_STATS'), async (req: Authenti
 })
 
 // GET /api/admin/users - Get all users
-router.get('/users', requirePermission('VIEW_ALL_USERS'), async (req: AuthenticatedRequest, res) => {
+router.get('/users', requirePermission('VIEW_USERS'), async (req: AuthenticatedRequest, res) => {
   try {
     const page = parseInt(req.query.page as string || '1')
     const limit = parseInt(req.query.limit as string || '10')
@@ -157,7 +213,7 @@ router.get('/users', requirePermission('VIEW_ALL_USERS'), async (req: Authentica
 })
 
 // GET /api/admin/martyrs - Get all martyrs
-router.get('/martyrs', requirePermission('VIEW_ALL_MARTYRS'), async (req: AuthenticatedRequest, res) => {
+router.get('/martyrs', requirePermission('EDIT_MARTYRS'), async (req: AuthenticatedRequest, res) => {
   try {
     const page = parseInt(req.query.page as string || '1')
     const limit = parseInt(req.query.limit as string || '10')

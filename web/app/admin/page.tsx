@@ -56,14 +56,23 @@ export default function AdminPage() {
       setStatsLoading(true)
       setStatsError(null)
       
-      const response = await fetch('/api/admin/stats')
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+      const token = user?.token || JSON.parse(localStorage.getItem('user') || '{}').token
+      
+      const response = await fetch(`${apiUrl}/api/admin/stats`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
       
       const data = await response.json()
       setStats(data)
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to load admin stats:", err)
       setStatsError(`Failed to load statistics: ${err.message}`)
     } finally {

@@ -21,7 +21,6 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { AlertCircle, CheckCircle2, PlusCircle } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { addMartyr } from "@/app/actions"
 
 export function AddMartyrForm() {
   const [open, setOpen] = useState(false)
@@ -49,21 +48,118 @@ export function AddMartyrForm() {
     const formData = new FormData(form)
 
     try {
-      const result = await addMartyr(formData)
-      setFormState(result)
+      // Extract form data
+      const name = formData.get("name") as string
+      const date = formData.get("date") as string
+      const location = formData.get("location") as string
+      const description = formData.get("description") as string
+      const source = formData.get("source") as string
 
-      if (result.success) {
-        // Reset form on success
-        form.reset()
+      // Optional fields
+      const age = formData.get("age") ? Number.parseInt(formData.get("age") as string) : undefined
+      const gender = (formData.get("gender") as string) || undefined
+      const occupation = (formData.get("occupation") as string) || undefined
+      const familyStatus = (formData.get("familyStatus") as string) || undefined
+      const cause = (formData.get("cause") as string) || undefined
+      const imageUrl = (formData.get("imageUrl") as string) || undefined
+      const submitterRelationship = (formData.get("submitterRelationship") as string) || undefined
 
-        // Close dialog after delay
-        setTimeout(() => {
-          setOpen(false)
-          // Refresh the page to show the new martyr
-          router.refresh()
-        }, 3000)
+      // Simple validation
+      if (!name || name.length < 2) {
+        setFormState({ success: false, message: "Name must be at least 2 characters" })
+        return
       }
+
+      if (!date) {
+        setFormState({ success: false, message: "Date is required" })
+        return
+      }
+
+      if (!location) {
+        setFormState({ success: false, message: "Location is required" })
+        return
+      }
+
+      if (!description || description.length < 20) {
+        setFormState({ success: false, message: "Description must be at least 20 characters" })
+        return
+      }
+
+      if (!source || source.length < 10) {
+        setFormState({ success: false, message: "Source information must be at least 10 characters" })
+        return
+      }
+
+      // Parse and validate date
+      const dateOfDeath = new Date(date)
+      if (isNaN(dateOfDeath.getTime())) {
+        setFormState({ success: false, message: "Please enter a valid date" })
+        return
+      }
+
+      // Get JWT token from user object
+      const token = (user as any)?.token
+      if (!token) {
+        setFormState({ success: false, message: "You must be logged in to submit a martyr profile" })
+        return
+      }
+
+      // Prepare contribution content
+      const content = {
+        name,
+        dateOfDeath: dateOfDeath.toISOString(),
+        location,
+        description,
+        cause,
+        image: imageUrl,
+        age,
+        gender: gender?.toUpperCase(),
+        occupation,
+        familyStatus,
+        submitterRelationship
+      }
+
+      // Call API to create contribution
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+      const response = await fetch(`${apiUrl}/api/contributions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          type: 'MARTYR_ADDITION',
+          content,
+          notes: `Source: ${source}`
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        setFormState({
+          success: false,
+          message: result.error || "Failed to submit martyr profile"
+        })
+        return
+      }
+
+      setFormState({
+        success: true,
+        message: result.message || "Thank you for submitting this profile. It has been saved and will be reviewed before being published.",
+      })
+
+      // Reset form on success
+      form.reset()
+
+      // Close dialog after delay
+      setTimeout(() => {
+        setOpen(false)
+        // Refresh the page to show the new martyr
+        router.refresh()
+      }, 3000)
     } catch (error) {
+      console.error("Error submitting martyr:", error)
       setFormState({
         success: false,
         message: "An error occurred. Please try again.",

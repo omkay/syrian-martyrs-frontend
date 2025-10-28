@@ -1,7 +1,7 @@
 "use server"
 
 import { apiClient } from "@/lib/api-client"
-import { hashPassword, verifyPassword, validatePassword, validateEmail, generateSecureToken, generateToken } from "@/lib/auth-utils"
+import { validatePassword, validateEmail, generateSecureToken } from "@/lib/validation-utils"
 import type { Martyr } from "@/lib/types"
 
 // Helper function to get or create a user for anonymous submissions
@@ -77,21 +77,21 @@ export async function submitContribution(formData: FormData) {
       return { success: false, message: "Please enter a valid email" }
     }
 
-    if (!content || content.length < 10) {
-      return { success: false, message: "Content must be at least 10 characters" }
+    if (!contributionType) {
+      return { success: false, message: "Contribution type is required" }
     }
 
-    // Get or create user for this submission
-    const user = await getOrCreateAnonymousUser(email, name)
-    if (!user) {
-      return { success: false, message: "Failed to create user account" }
+    // Validate content based on type
+    if (contributionType === 'TESTIMONIAL_ADDITION' && (!content || content.length < 10)) {
+      return { success: false, message: "Testimonial must be at least 10 characters" }
     }
 
-    // For now, just return success without calling API
-    // This will be replaced with actual API calls
+    // Note: This is a server action, so we cannot access localStorage directly
+    // The token must be passed from the client component
+    // For now, we'll return an error - the component needs to be updated to call API directly
     return {
-      success: true,
-      message: "Thank you for your contribution. It has been submitted for review.",
+      success: false,
+      message: "Testimonial submission needs to be called from the client component with authentication token",
     }
   } catch (error) {
     console.error("Error submitting contribution:", error)
@@ -145,13 +145,7 @@ export async function addMartyr(formData: FormData, userId?: string) {
     let dateOfDeath: Date
     try {
       // Try to parse as ISO date first
-      if (date.includes('-') || date.includes('/')) {
-        dateOfDeath = new Date(date)
-      } else {
-        // For text dates like "March 15, 2011", we'll use a more flexible approach
-        // For now, let's use a default date if parsing fails
-        dateOfDeath = new Date(date) || new Date('2011-03-15') // Default to March 15, 2011
-      }
+      dateOfDeath = new Date(date)
       
       // Validate the date
       if (isNaN(dateOfDeath.getTime())) {
@@ -161,11 +155,59 @@ export async function addMartyr(formData: FormData, userId?: string) {
       return { success: false, message: "Please enter a valid date" }
     }
 
-    // For now, just return success without calling API
-    // This will be replaced with actual API calls
+    // Get JWT token from localStorage (client-side) or from cookies
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
+    
+    if (!token) {
+      return { 
+        success: false, 
+        message: "You must be logged in to submit a martyr profile" 
+      }
+    }
+
+    // Prepare contribution content
+    const content = {
+      name,
+      dateOfDeath: dateOfDeath.toISOString(),
+      location,
+      description,
+      cause,
+      image: imageUrl,
+      age,
+      gender: gender?.toUpperCase(),
+      occupation,
+      familyStatus,
+      submitterRelationship
+    }
+
+    // Call API to create contribution
+    // @ts-ignore - process.env is available in server actions
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+    const response = await fetch(`${apiUrl}/api/contributions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        type: 'MARTYR_ADDITION',
+        content,
+        notes: `Source: ${source}`
+      })
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      return {
+        success: false,
+        message: result.error || "Failed to submit martyr profile"
+      }
+    }
+
     return {
       success: true,
-      message: "Thank you for submitting this profile. It has been saved and will be reviewed before being published.",
+      message: result.message || "Thank you for submitting this profile. It has been saved and will be reviewed before being published.",
     }
   } catch (error) {
     console.error("Error creating martyr:", error)

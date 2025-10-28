@@ -15,18 +15,28 @@ export const authMiddleware = (req: AuthenticatedRequest, res: Response, next: N
     const token = req.headers.authorization?.replace('Bearer ', '')
     
     if (!token) {
-      return res.status(401).json({ error: 'Unauthorized' })
+      console.log('[Auth] No token provided')
+      return res.status(401).json({ error: 'No token provided' })
     }
 
+    console.log('[Auth] Verifying token:', token.substring(0, 20) + '...')
     const decoded = verifyJWT(token)
     if (!decoded) {
-      return res.status(401).json({ error: 'Invalid token' })
+      console.log('[Auth] Token verification failed')
+      return res.status(401).json({ error: 'Token verification failed' })
     }
 
-    req.user = decoded
+    console.log('[Auth] Token verified for user:', decoded.userId)
+    // Map userId to id for consistency
+    req.user = {
+      id: decoded.userId,
+      email: decoded.email,
+      role: decoded.role
+    }
     next()
   } catch (error) {
-    return res.status(401).json({ error: 'Invalid token' })
+    console.error('[Auth] Error in auth middleware:', error)
+    return res.status(401).json({ error: 'Authentication error' })
   }
 }
 

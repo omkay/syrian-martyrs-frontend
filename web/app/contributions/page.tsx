@@ -53,11 +53,34 @@ export default function ContributionsPage() {
   const loadContributions = async () => {
     try {
       setIsLoading(true)
-      // For now, return empty array until API is fully implemented
-      // This will be replaced with actual API calls
-      setContributions([])
+      setError(null)
+
+      // Get JWT token from user object
+      const token = (user as any)?.token
+      if (!token) {
+        setError("Authentication token not found. Please log in again.")
+        setContributions([])
+        return
+      }
+
+      // Call API to get user's contributions
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+      const response = await fetch(`${apiUrl}/api/contributions`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to load contributions: ${response.status}`)
+      }
+
+      const data = await response.json()
+      setContributions(Array.isArray(data) ? data : [])
     } catch (err) {
-      setError("Failed to load contributions")
+      console.error('Error loading contributions:', err)
+      setError("Failed to load contributions. Please try again.")
+      setContributions([])
     } finally {
       setIsLoading(false)
     }
@@ -223,13 +246,30 @@ export default function ContributionsPage() {
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-2">
+                          {contribution.type === 'MARTYR_ADDITION' && contribution.content && (
+                            <>
+                              <p className="text-sm">
+                                <strong>Name:</strong> {contribution.content.name}
+                              </p>
+                              {contribution.content.location && (
+                                <p className="text-sm text-muted-foreground">
+                                  <strong>Location:</strong> {contribution.content.location}
+                                </p>
+                              )}
+                              {contribution.content.dateOfDeath && (
+                                <p className="text-sm text-muted-foreground">
+                                  <strong>Date:</strong> {new Date(contribution.content.dateOfDeath).toLocaleDateString()}
+                                </p>
+                              )}
+                            </>
+                          )}
                           {contribution.martyr && (
                             <p className="text-sm text-muted-foreground">
                               Related to: <strong>{contribution.martyr.name}</strong>
                             </p>
                           )}
                           {contribution.notes && (
-                            <p className="text-sm">{contribution.notes}</p>
+                            <p className="text-sm italic text-muted-foreground mt-2">{contribution.notes}</p>
                           )}
                         </div>
                       </CardContent>
@@ -287,13 +327,25 @@ export default function ContributionsPage() {
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-2">
-                          {contribution.martyr && (
-                            <p className="text-sm text-muted-foreground">
-                              Related to: <strong>{contribution.martyr.name}</strong>
-                            </p>
+                          {contribution.content && (
+                            <>
+                              <p className="text-sm">
+                                <strong>Name:</strong> {contribution.content.name}
+                              </p>
+                              {contribution.content.location && (
+                                <p className="text-sm text-muted-foreground">
+                                  <strong>Location:</strong> {contribution.content.location}
+                                </p>
+                              )}
+                              {contribution.content.dateOfDeath && (
+                                <p className="text-sm text-muted-foreground">
+                                  <strong>Date:</strong> {new Date(contribution.content.dateOfDeath).toLocaleDateString()}
+                                </p>
+                              )}
+                            </>
                           )}
                           {contribution.notes && (
-                            <p className="text-sm">{contribution.notes}</p>
+                            <p className="text-sm italic text-muted-foreground mt-2">{contribution.notes}</p>
                           )}
                         </div>
                       </CardContent>
@@ -352,8 +404,11 @@ export default function ContributionsPage() {
                               Related to: <strong>{contribution.martyr.name}</strong>
                             </p>
                           )}
+                          {contribution.content?.content && (
+                            <p className="text-sm">{contribution.content.content}</p>
+                          )}
                           {contribution.notes && (
-                            <p className="text-sm">{contribution.notes}</p>
+                            <p className="text-sm italic text-muted-foreground mt-2">{contribution.notes}</p>
                           )}
                         </div>
                       </CardContent>

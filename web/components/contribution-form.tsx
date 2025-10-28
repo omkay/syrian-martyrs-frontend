@@ -5,7 +5,6 @@ import type React from "react"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
-import { submitContribution } from "@/app/actions"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -53,21 +52,98 @@ export function ContributionForm({ martyrId, martyrName }: ContributionFormProps
 
     const form = event.currentTarget
     const formData = new FormData(form)
-    formData.append("martyrId", martyrId)
 
     try {
-      const result = await submitContribution(formData)
-      setFormState(result)
+      // Extract form data
+      const relationship = formData.get("relationship") as string
+      const content = formData.get("content") as string
+      const url = formData.get("url") as string
+      const notes = formData.get("notes") as string
 
-      if (result.success) {
-        // Reset form on success
-        form.reset()
-        setContributionType("TESTIMONIAL_ADDITION")
-
-        // Close dialog after delay
-        setTimeout(() => setOpen(false), 3000)
+      // Validation
+      if (contributionType === 'TESTIMONIAL_ADDITION' && (!content || content.length < 10)) {
+        setFormState({
+          success: false,
+          message: "Testimonial must be at least 10 characters"
+        })
+        return
       }
+
+      // Get JWT token from user object
+      const token = (user as any)?.token
+      if (!token) {
+        setFormState({
+          success: false,
+          message: "You must be logged in to submit a contribution"
+        })
+        return
+      }
+
+      // Prepare contribution data based on type
+      let contributionContent: any = {}
+      
+      if (contributionType === 'TESTIMONIAL_ADDITION') {
+        contributionContent = {
+          content,
+          author: user.name,
+          relationship: relationship || 'Unknown'
+        }
+      } else if (contributionType === 'PHOTO_ADDITION') {
+        contributionContent = {
+          url: url || '',
+          description: content || ''
+        }
+      } else if (contributionType === 'DOCUMENT_ADDITION') {
+        contributionContent = {
+          url: url || '',
+          description: content || ''
+        }
+      } else {
+        contributionContent = {
+          content: content || '',
+          relationship: relationship || ''
+        }
+      }
+
+      // Call API to create contribution
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+      const response = await fetch(`${apiUrl}/api/contributions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          type: contributionType,
+          content: contributionContent,
+          martyrId: martyrId,
+          notes: notes || `Submitted by ${user.name}`
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        setFormState({
+          success: false,
+          message: result.error || "Failed to submit contribution"
+        })
+        return
+      }
+
+      setFormState({
+        success: true,
+        message: result.message || "Thank you for your contribution. It has been submitted for review.",
+      })
+
+      // Reset form on success
+      form.reset()
+      setContributionType("TESTIMONIAL_ADDITION")
+
+      // Close dialog after delay
+      setTimeout(() => setOpen(false), 3000)
     } catch (error) {
+      console.error("Error submitting contribution:", error)
       setFormState({
         success: false,
         message: "An error occurred. Please try again.",

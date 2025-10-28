@@ -42,13 +42,11 @@ services:
       - "3001:3001"
     environment:
       - NODE_ENV=development
-      - DATABASE_URL=postgresql://postgres:password@postgres:5432/syrian_martyrs_db
+      - DATABASE_URL=prisma+postgres://accelerate.prisma-data.net/?api_key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqd3RfaWQiOjEsInNlY3VyZV9rZXkiOiJza19LMmhCRFZwTlJUcHNxZFd1aVNEYTAiLCJhcGlfa2V5IjoiMDFLNEpQMUVHU045QUVNQzlZQzhSWVpDS0siLCJ0ZW5hbnRfaWQiOiJhNGRkOTJiMjYwZDM4OTE2NWYzZjcwYzU5ZmNmN2NmNGVjNWYxOWIzYWE2N2Y3YTAxZjdmZmEwN2RmMzNlNWZiIiwiaW50ZXJuYWxfc2VjcmV0IjoiYWE1YjU0MTMtMTEyNC00YjJhLTk4MTEtZTdjNTQ0MjI5ZmEzIn0.IWzNb-5xwiU4fO9ijd_EtnOrKjEc5F1E8X9CoIilSk0
       - REDIS_URL=redis://redis:6379
       - JWT_SECRET=your-jwt-secret-key-here
       - FRONTEND_URL=http://localhost:3000
     depends_on:
-      postgres:
-        condition: service_healthy
       redis:
         condition: service_healthy
     volumes:
@@ -66,7 +64,9 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=development
+      - DATABASE_URL=prisma+postgres://accelerate.prisma-data.net/?api_key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqd3RfaWQiOjEsInNlY3VyZV9rZXkiOiJza19LMmhCRFZwTlJUcHNxZFd1aVNEYTAiLCJhcGlfa2V5IjoiMDFLNEpQMUVHU045QUVNQzlZQzhSWVpDS0siLCJ0ZW5hbnRfaWQiOiJhNGRkOTJiMjYwZDM4OTE2NWYzZjcwYzU5ZmNmN2NmNGVjNWYxOWIzYWE2N2Y3YTAxZjdmZmEwN2RmMzNlNWZiIiwiaW50ZXJuYWxfc2VjcmV0IjoiYWE1YjU0MTMtMTEyNC00YjJhLTk4MTEtZTdjNTQ0MjI5ZmEzIn0.IWzNb-5xwiU4fO9ijd_EtnOrKjEc5F1E8X9CoIilSk0
       - NEXT_PUBLIC_API_URL=http://localhost:3001
+      - API_URL=http://api-dev:3001
       - NEXT_TELEMETRY_DISABLED=1
     depends_on:
       - api-dev

@@ -18,7 +18,7 @@ export function MartyrCard({ martyr }: MartyrCardProps) {
         <CardContent className="space-y-2">
           <div className="flex items-center text-sm text-muted-foreground">
             <CalendarIcon className="mr-1 h-4 w-4" />
-            <span>{martyr.dateOfDeath.toLocaleDateString()}</span>
+            <span>{new Date(martyr.dateOfDeath).toLocaleDateString()}</span>
           </div>
           <div className="flex items-center text-sm text-muted-foreground">
             <MapPinIcon className="mr-1 h-4 w-4" />
