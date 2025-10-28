@@ -1,8 +1,12 @@
 services:
-  # PostgreSQL Database
-  postgres:
+  # ============================================
+  # Development Infrastructure
+  # ============================================
+  
+  # PostgreSQL Database (Development)
+  postgres-dev:
     image: postgres:15-alpine
-    container_name: syrian-martyrs-db
+    container_name: syrian-martyrs-db-dev
     environment:
       POSTGRES_DB: syrian_martyrs_db
       POSTGRES_USER: postgres
@@ -10,107 +14,116 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data_dev:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
+    profiles:
+      - development
 
-  # Redis for caching and sessions
-  redis:
+  # Redis (Development)
+  redis-dev:
     image: redis:7-alpine
-    container_name: syrian-martyrs-redis
+    container_name: syrian-martyrs-redis-dev
     ports:
       - "6379:6379"
     volumes:
-      - redis_data:/data
+      - redis_data_dev:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
+    profiles:
+      - development
 
-  # API Service
-  api:
-    build:
-      context: ./api
-      dockerfile: Dockerfile
-    container_name: syrian-martyrs-api
-    ports:
-      - "3001:3001"
+  # ============================================
+  # Production Infrastructure
+  # ============================================
+  
+  # PostgreSQL Database (Production)
+  postgres-prod:
+    image: postgres:15-alpine
+    container_name: syrian-martyrs-db-prod
     environment:
-      - NODE_ENV=production
-      - DATABASE_URL=postgresql://postgres:password@postgres:5432/syrian_martyrs_db
-      - REDIS_URL=redis://redis:6379
-      - JWT_SECRET=your-jwt-secret-key-here
-      - FRONTEND_URL=http://localhost:3000
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      POSTGRES_DB: syrian_martyrs_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5433:5432"  # Different port to avoid conflict with dev
     volumes:
-      - ./api:/app
-      - /app/node_modules
+      - postgres_data_prod:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     profiles:
       - production
 
-  # Web Service
-  web:
-    build:
-      context: ./web
-      dockerfile: Dockerfile
-    container_name: syrian-martyrs-web
+  # Redis (Production)
+  redis-prod:
+    image: redis:7-alpine
+    container_name: syrian-martyrs-redis-prod
     ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=http://localhost:3001
-      - NEXT_TELEMETRY_DISABLED=1
-    depends_on:
-      - api
+      - "6380:6379"  # Different port to avoid conflict with dev
+    volumes:
+      - redis_data_prod:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     profiles:
       - production
 
-  # Development API Service
+  # ============================================
+  # Development Services
+  # ============================================
+
+  # API Service (Development)
   api-dev:
     build:
       context: ./api
       dockerfile: Dockerfile
+      target: development
     container_name: syrian-martyrs-api-dev
     ports:
       - "3001:3001"
+    env_file:
+      - .env
     environment:
       - NODE_ENV=development
-      - DATABASE_URL="prisma+postgres://accelerate.prisma-data.net/?api_key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqd3RfaWQiOjEsInNlY3VyZV9rZXkiOiJza19LMmhCRFZwTlJUcHNxZFd1aVNEYTAiLCJhcGlfa2V5IjoiMDFLNEpQMUVHU045QUVNQzlZQzhSWVpDS0siLCJ0ZW5hbnRfaWQiOiJhNGRkOTJiMjYwZDM4OTE2NWYzZjcwYzU5ZmNmN2NmNGVjNWYxOWIzYWE2N2Y3YTAxZjdmZmEwN2RmMzNlNWZiIiwiaW50ZXJuYWxfc2VjcmV0IjoiYWE1YjU0MTMtMTEyNC00YjJhLTk4MTEtZTdjNTQ0MjI5ZmEzIn0.IWzNb-5xwiU4fO9ijd_EtnOrKjEc5F1E8X9CoIilSk0"
-      - REDIS_URL=redis://redis:6379
-      - JWT_SECRET=your-jwt-secret-key-here
+      - REDIS_URL=redis://redis-dev:6379
       - FRONTEND_URL=http://localhost:3000
     depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
+      redis-dev:
         condition: service_healthy
     volumes:
       - ./api:/app
       - /app/node_modules
-    command: npm run dev
     profiles:
       - development
 
-  # Development Web Service
+  # Web Service (Development)
   web-dev:
     build:
       context: ./web
       dockerfile: Dockerfile
+      target: development
     container_name: syrian-martyrs-web-dev
     ports:
       - "3000:3000"
+    env_file:
+      - .env
     environment:
       - NODE_ENV=development
       - NEXT_PUBLIC_API_URL=http://localhost:3001
+      - API_URL=http://api-dev:3001
       - NEXT_TELEMETRY_DISABLED=1
     depends_on:
       - api-dev
@@ -118,10 +131,59 @@ services:
       - ./web:/app
       - /app/node_modules
       - /app/.next
-    command: npm run dev
     profiles:
       - development
 
+  # ============================================
+  # Production Services
+  # ============================================
+
+  # API Service (Production)
+  api-prod:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+      target: production
+    container_name: syrian-martyrs-api-prod
+    ports:
+      - "3002:3001"  # Different port to avoid conflict with dev
+    env_file:
+      - .env.production
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis-prod:6379
+      - FRONTEND_URL=http://localhost:3100
+    depends_on:
+      postgres-prod:
+        condition: service_healthy
+      redis-prod:
+        condition: service_healthy
+    profiles:
+      - production
+
+  # Web Service (Production)
+  web-prod:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      target: production
+    container_name: syrian-martyrs-web-prod
+    ports:
+      - "3100:3000"  # Different port to avoid conflict with dev
+    env_file:
+      - .env.production
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://localhost:3002
+      - API_URL=http://api-prod:3001
+      - NEXT_TELEMETRY_DISABLED=1
+    depends_on:
+      - api-prod
+    profiles:
+      - production
+
 volumes:
-  postgres_data:
-  redis_data:
+  postgres_data_dev:
+  redis_data_dev:
+  postgres_data_prod:
+  redis_data_prod:
