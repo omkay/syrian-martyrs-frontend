@@ -1,55 +1,79 @@
-# API Service Dockerfile
-FROM node:18-alpine AS base
+# Unified API Service Dockerfile with multi-stage support
+# Use: --target development for dev, --target production (default) for prod
 
-# Install dependencies only when needed
-FROM base AS deps
-RUN apk add --no-cache libc6-compat
+FROM node:18-alpine AS base
 WORKDIR /app
 
-# Install dependencies based on the preferred package manager
+# ============================================
+# Development Stage
+# ============================================
+FROM base AS development
+
+# Install dependencies
 COPY package.json package-lock.json* pnpm-lock.yaml* ./
+COPY prisma ./prisma/
+
 RUN \
-  if [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile; \
+  if [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm install; \
   elif [ -f package-lock.json ]; then npm ci; \
-  else echo "Lockfile not found." && exit 1; \
+  else npm install --legacy-peer-deps; \
   fi
 
-# Rebuild the source code only when needed
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+# Copy source code
 COPY . .
 
 # Generate Prisma client
 RUN npx prisma generate
 
-# Build the application
+EXPOSE 3001
+ENV PORT=3001
+ENV NODE_ENV=development
+
+CMD ["npm", "run", "dev"]
+
+# ============================================
+# Production Dependencies Stage
+# ============================================
+FROM base AS deps
+RUN apk add --no-cache libc6-compat
+
+COPY package.json package-lock.json* pnpm-lock.yaml* ./
 RUN \
-  if [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm run build; \
-  elif [ -f package-lock.json ]; then npm run build; \
-  else echo "Lockfile not found." && exit 1; \
+  if [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile; \
+  elif [ -f package-lock.json ]; then npm ci --legacy-peer-deps; \
+  else npm install --legacy-peer-deps --no-package-lock; \
   fi
 
-# Production image
-FROM base AS runner
-WORKDIR /app
+# ============================================
+# Production Stage
+# ============================================
+FROM base AS production
 
-ENV NODE_ENV production
+ENV NODE_ENV=production
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 api
+# Copy dependencies (install all deps including devDependencies for tsx)
+COPY package.json package-lock.json* pnpm-lock.yaml* ./
+RUN \
+  if [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm install; \
+  elif [ -f package-lock.json ]; then npm ci --legacy-peer-deps; \
+  else npm install --legacy-peer-deps --no-package-lock; \
+  fi
 
-# Copy built application
-COPY --from=builder --chown=api:nodejs /app/dist ./dist
-COPY --from=builder --chown=api:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=api:nodejs /app/prisma ./prisma
-COPY --from=builder --chown=api:nodejs /app/lib ./lib
+# Copy application code
+COPY . .
+
+# Generate Prisma client
+RUN npx prisma generate
+
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 api
+
+RUN chown -R api:nodejs /app
 
 USER api
 
 EXPOSE 3001
+ENV PORT=3001
 
-ENV PORT 3001
-
-CMD ["node", "dist/server.js"]
-
+# Use tsx to run TypeScript directly (no build step needed)
+CMD ["npx", "tsx", "server.ts"]

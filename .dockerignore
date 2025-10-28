@@ -1,0 +1,77 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+!README.md
+LICENSE
+diary/
+DEVELOPMENT_PLANNING.md
+DATABASE_IMPLEMENTATION_SUMMARY.md
+DATABASE_SETUP.md
+EMAIL_VERIFICATION_SETUP.md
+PRODUCTION_TODO.md
+DOCKER_QUICK_START.md
+DOCKER_ARCHITECTURE.md
+
+# Dependencies
+node_modules
+**/node_modules
+
+# Build outputs
+.next/
+out/
+build/
+dist/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+.env.example
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+coverage/
+.nyc_output/
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Temporary files
+*.log
+tmp/
+temp/
+
+# Lock files (will be copied explicitly in Dockerfile)
+# Uncomment if needed
+# package-lock.json
+# pnpm-lock.yaml
+# yarn.lock
+
+# Scripts (not needed in runtime)
+scripts/
+
+# Docker
+docker-compose*.yml
+Dockerfile*
+.dockerignore
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+
