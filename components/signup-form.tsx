@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { signup } from "@/app/actions"
+import { useAuth } from "@/lib/auth-context"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -16,6 +16,7 @@ interface SignupFormProps {
 }
 
 export function SignupForm({ onSuccess, onError }: SignupFormProps) {
+  const { register } = useAuth()
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -87,13 +88,11 @@ export function SignupForm({ onSuccess, onError }: SignupFormProps) {
     setErrors({})
 
     try {
-      const formDataToSubmit = new FormData()
-      formDataToSubmit.append("name", formData.name.trim())
-      formDataToSubmit.append("email", formData.email.trim())
-      formDataToSubmit.append("password", formData.password)
-      formDataToSubmit.append("confirmPassword", formData.confirmPassword)
-
-      const result = await signup(formDataToSubmit)
+      const result = await register(
+        formData.name.trim(),
+        formData.email.trim(),
+        formData.password
+      )
 
       if (result.success) {
         setSuccessMessage(result.message)

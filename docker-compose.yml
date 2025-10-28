@@ -1,54 +1,127 @@
-version: '3.8'
-
 services:
-  # Development service with hot reload
-  app-dev:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
-    ports:
-      - "3000:3000"
-    volumes:
-      - .:/app
-      - /app/node_modules
-      - /app/.next
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: syrian-martyrs-db
     environment:
-      - NODE_ENV=development
-      - NEXT_TELEMETRY_DISABLED=1
-      # - DATABASE_URL=postgresql://postgres:password@host.docker.internal:51213/syrian_martyrs_db
-      - NEXTAUTH_SECRET=your-secret-key-here
-      - NEXTAUTH_URL=http://localhost:3000
-    command: pnpm dev
-    profiles:
-      - dev
+      POSTGRES_DB: syrian_martyrs_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  # Production service
-  app-prod:
+  # Redis for caching and sessions
+  redis:
+    image: redis:7-alpine
+    container_name: syrian-martyrs-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # API Service
+  api:
     build:
-      context: .
+      context: ./api
       dockerfile: Dockerfile
+    container_name: syrian-martyrs-api
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/syrian_martyrs_db
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=your-jwt-secret-key-here
+      - FRONTEND_URL=http://localhost:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./api:/app
+      - /app/node_modules
+    profiles:
+      - production
+
+  # Web Service
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: syrian-martyrs-web
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://localhost:3001
       - NEXT_TELEMETRY_DISABLED=1
+    depends_on:
+      - api
     profiles:
-      - prod
+      - production
 
-  # Development with pnpm install
-  app-dev-fresh:
+  # Development API Service
+  api-dev:
     build:
-      context: .
-      dockerfile: Dockerfile.dev
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: syrian-martyrs-api-dev
     ports:
-      - "3000:3000"
-    volumes:
-      - .:/app
-      - /app/node_modules
-      - /app/.next
+      - "3001:3001"
     environment:
       - NODE_ENV=development
-      - NEXT_TELEMETRY_DISABLED=1
-    command: sh -c "pnpm install && pnpm dev"
+      - DATABASE_URL="prisma+postgres://accelerate.prisma-data.net/?api_key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqd3RfaWQiOjEsInNlY3VyZV9rZXkiOiJza19LMmhCRFZwTlJUcHNxZFd1aVNEYTAiLCJhcGlfa2V5IjoiMDFLNEpQMUVHU045QUVNQzlZQzhSWVpDS0siLCJ0ZW5hbnRfaWQiOiJhNGRkOTJiMjYwZDM4OTE2NWYzZjcwYzU5ZmNmN2NmNGVjNWYxOWIzYWE2N2Y3YTAxZjdmZmEwN2RmMzNlNWZiIiwiaW50ZXJuYWxfc2VjcmV0IjoiYWE1YjU0MTMtMTEyNC00YjJhLTk4MTEtZTdjNTQ0MjI5ZmEzIn0.IWzNb-5xwiU4fO9ijd_EtnOrKjEc5F1E8X9CoIilSk0"
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=your-jwt-secret-key-here
+      - FRONTEND_URL=http://localhost:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./api:/app
+      - /app/node_modules
+    command: npm run dev
     profiles:
-      - dev-fresh
+      - development
+
+  # Development Web Service
+  web-dev:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: syrian-martyrs-web-dev
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:3001
+      - NEXT_TELEMETRY_DISABLED=1
+    depends_on:
+      - api-dev
+    volumes:
+      - ./web:/app
+      - /app/node_modules
+      - /app/.next
+    command: npm run dev
+    profiles:
+      - development
+
+volumes:
+  postgres_data:
+  redis_data:
